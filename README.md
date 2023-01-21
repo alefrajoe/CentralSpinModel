@@ -10,6 +10,15 @@ To compile the code
 > g++ -O3 *.cpp -o central -lm -larmadillo -lstdc++fs
 
 The parameters to be passed to the program are
+- **L**: int - length of the Ising chain
+- **g**: double - transverse field coupling of the chain
+- **$\lambda$**: double - gap of the single qubit
+- **$\kappa**: double - interaction strength between the qubit and the chain
+- **a**: int - interaction term for the qubit $\sim \hat{\Sigma}^{(a)}$, it can be $a=1,2,3$.
+- **b**: int - interaction term for the chain $\sim \hat{\sigma}^{(b)}$, it can be $b=1,2,3$.
+- **$t_{KZ}$**: double - typical timescale over which the coupling in the KZ protocol is changed.
+                        The coupling is $C=g,\lambda, \text{or} \kappa$, and it is changed with time as
+                        $C\to C+t/t_{KZ}$. 
 
 # Observables
 We consider the following observables

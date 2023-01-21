@@ -89,14 +89,14 @@ Model::Model(int argc, char **argv)
         exit(1);
     }
     // create filename
-    this->filename = "data_centralspin/data" + inter_string + std::to_string(this->g) + "g" + std::to_string(this->lambda) + "lambda" + std::to_string(this->kappa) + "kappa" + std::to_string(this->L) + "L.txt";
+    this->filename = "data_centralspin/data" + inter_string + std::to_string(this->g) + "g" + std::to_string(this->lambda) + "lambda" + std::to_string(this->kappa) + "kappa" + std::to_string(this->L) + "L" + std::to_string(this->t_KZ) + "tKZ" + ".txt";
 
     // open file inside directory and write first line
     // create ofstream variable
     std::ofstream outfile;
     // open file
     outfile.open(this->filename, std::ios_base::app); 
-    outfile << "#L   g   lambda  kappa   magx    magy    magz" << std::endl;
+    outfile << "#L   g   lambda  kappa  time  t_KZ   magx    magy    magz" << std::endl;
     // close file
     outfile.close();
 }
@@ -258,6 +258,7 @@ void Model::AddInteractionCentralSpinAndChain(int a, int b, double par)
             interaction_spin = sigmaz;
             break;
         default:
+            std::cout << "Interaction passed for the spin doesn't exist!" << std::endl;
             exit(1);
             break;
     }
@@ -274,6 +275,7 @@ void Model::AddInteractionCentralSpinAndChain(int a, int b, double par)
             interaction_chain = sigmaz;
             break;
         default:
+            std::cout << "Interaction passed for the chain doesn't exist!" << std::endl;
             exit(1);
             break;
     }
@@ -402,7 +404,7 @@ void Model::WriteObservables()
     outfile.open(this->filename, std::ios_base::app); 
 
     // write all observables to file
-    outfile << this->L << "\t" << std::setprecision(8) <<  this->g << "\t" << std::setprecision(8) <<  this->lambda << "\t" << std::setprecision(8) <<  this->kappa << "\t";
+    outfile << this->L << "\t" << std::setprecision(8) <<  this->g << "\t" << std::setprecision(8) <<  this->lambda << "\t" << std::setprecision(8) <<  this->kappa << "\t" << std::setprecision(8) <<  this->time << "\t" << std::setprecision(8) <<  this->t_KZ << "\t";
     for(int i=0; i<3; i++) outfile << std::setprecision(16) << this->magObs[i] << "\t";
     outfile << std::endl;
 
