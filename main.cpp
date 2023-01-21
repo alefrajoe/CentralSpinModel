@@ -14,6 +14,8 @@ int main(int argc, char **argv)
     Model model(argc, argv);
     model.AddHamiltonian();
     model.GroundStateAndEigenvals(model.state);
+    model.ComputeObservables();
+    model.WriteObservables();
 
     // return exit success
     return 0;

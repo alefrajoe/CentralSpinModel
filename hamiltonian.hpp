@@ -12,6 +12,8 @@ class Model
     double lambda;
     double kappa;
     double deltat;
+    double time;
+    double t_KZ;
     int interaction_spin;
     int interaction_chain;
 
@@ -48,6 +50,10 @@ class Model
     double ExpectationValueOfOperatorOnState(arma::sp_cx_dmat *op);
     void ComputeObservables();
     void WriteObservables();
+
+    // time evolution
+    arma::sp_cx_dmat ComputeHamiltonianAfterDX(double dx);
+    void RungeKuttaStep();
 };
 
 #endif

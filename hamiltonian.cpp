@@ -18,6 +18,9 @@ Model::Model(int argc, char **argv)
     this->kappa = atof(argv[4]);
     this->interaction_spin = atoi(argv[5]);
     this->interaction_chain = atoi(argv[6]);
+    this->deltat = atof(argv[7]);
+    this->t_KZ = atof(argv[8]);
+    this->time = 0.0;
     
     // initialize the hamiltonian
     // the 1^st spin is the central qubit
@@ -92,7 +95,7 @@ Model::Model(int argc, char **argv)
     std::ofstream outfile;
     // open file
     outfile.open(this->filename, std::ios_base::app); 
-    outfile << "#   L   g   lambda  kappa   magx    magy    magz" << std::endl;
+    outfile << "#L   g   lambda  kappa   magx    magy    magz" << std::endl;
     // close file
     outfile.close();
 }
@@ -397,6 +400,50 @@ void Model::WriteObservables()
     // open file
     outfile.open(this->filename, std::ios_base::app); 
 
+    // write all observables to file
+    outfile << this->L << "\t" << std::setprecision(8) <<  this->g << "\t" << std::setprecision(8) <<  this->lambda << "\t" << std::setprecision(8) <<  this->kappa << "\t";
+    for(int i=0; i<3; i++) outfile << std::setprecision(16) << this->magObs[i] << "\t";
+    outfile << std::endl;
+
     // close file
     outfile.close();
+}
+
+/**
+ * Compute the hamiltonian at time t + dx, where "t" is the current time stored into the model.
+ * The function returns the hamiltonian at time t+dx.
+ * parameters:
+ *              - double dx : infinitesimal amount of time such that the hamiltonian will be
+ *                            computed at t + dx
+ * return:
+ *              - arma::sp_cx_dmat : return the hamiltonian at time t + dx 
+*/
+arma::sp_cx_dmat Model::ComputeHamiltonianAfterDX(double dx)
+{
+    // define auxiliary hamiltonian and initialize to current hamiltonian
+    arma::sp_cx_dmat aux_ham = (*this->hamiltonian);
+
+    // dependently on the macro, compute H(x + dx)
+    // it is assumed that the parameter changed will be changed such that
+    // C = C + dx / t_KZ, where t_KZ is stored into the model
+    
+
+    return aux_ham;
+}
+
+/**
+ * Evolve the system in time by an amount of time equal to deltat.
+ * ------------------------------------
+ * parameters:
+ *              - None
+ * return:
+ *              - None
+*/
+void Model::RungeKuttaStep()
+{
+    // auxiliary complex vectors
+    arma::cx_vec k1, k2, k3, k4;
+
+    // compute k1
+    k1 = -1.0j * (*this->hamiltonian) * (*this->state);
 }

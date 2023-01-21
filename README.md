@@ -7,7 +7,7 @@ where Periodic Boundary Conditions (PBC) are intended, and $a, b=1,2,3$ are two 
 We set $J=1$, so that all quantities are measured in units of $J$.
 
 To compile the code
-> g++ -O3 *.cpp -o central -lm -larmadillo
+> g++ -O3 *.cpp -o central -lm -larmadillo -lstdc++fs
 
 The parameters to be passed to the program are
 

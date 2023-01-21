@@ -16,6 +16,14 @@
 //#define APBC
 
 /**
+ * Kibble-Zurek parameter:
+ * Choose the parameter to which KZ is applied
+*/
+//#define KZ_G
+//#define KZ_LAMBDA
+#define KZ_KAPPA
+
+/**
  * Observables taken into account.
  */
 #define OBS_MAG
