@@ -12,10 +12,13 @@ int main(int argc, char **argv)
     // read parameters from **argv
     // create the model
     Model model(argc, argv);
+
+    // ********** construct the hamiltonian and compute the Ground State ************* 
     model.AddHamiltonian();
     model.GroundStateAndEigenvals(model.state);
-    model.ComputeObservables();
-    model.WriteObservables();
+
+    // ************   Kibble - Zurek  **************************
+    model.TimeEvolutionProtocol();
 
     // return exit success
     return 0;

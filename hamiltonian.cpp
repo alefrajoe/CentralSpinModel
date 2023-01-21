@@ -21,6 +21,7 @@ Model::Model(int argc, char **argv)
     this->deltat = atof(argv[7]);
     this->t_KZ = atof(argv[8]);
     this->time = 0.0;
+    this->final_param = atof(argv[9]);
     
     // initialize the hamiltonian
     // the 1^st spin is the central qubit
@@ -410,25 +411,33 @@ void Model::WriteObservables()
 }
 
 /**
- * Compute the hamiltonian at time t + dx, where "t" is the current time stored into the model.
- * The function returns the hamiltonian at time t+dx.
+ * Evolve the hamiltonian up to time t + dx, where "t" is the current time stored into the model.
+ * The function acts inplace.
  * parameters:
  *              - double dx : infinitesimal amount of time such that the hamiltonian will be
  *                            computed at t + dx
  * return:
- *              - arma::sp_cx_dmat : return the hamiltonian at time t + dx 
+ *              - None
 */
-arma::sp_cx_dmat Model::ComputeHamiltonianAfterDX(double dx)
+void Model::EvolveHamiltonianByDx(double dx)
 {
-    // define auxiliary hamiltonian and initialize to current hamiltonian
-    arma::sp_cx_dmat aux_ham = (*this->hamiltonian);
-
     // dependently on the macro, compute H(x + dx)
     // it is assumed that the parameter changed will be changed such that
     // C = C + dx / t_KZ, where t_KZ is stored into the model
-    
+    #ifdef KZ_G
+    this->AddTransverseFieldChain(dx/this->t_KZ);
+    this->g += dx/this->t_KZ;
+    #endif
 
-    return aux_ham;
+    #ifdef KZ_LAMBDA
+    this->AddSpinHamiltonian(dx/this->t_KZ);
+    this->lambda += dx/this->t_KZ;
+    #endif
+
+    #ifdef KZ_KAPPA
+    this->AddInteractionCentralSpinAndChain(this->interaction_spin, this->interaction_chain, dx/this->t_KZ);
+    this->kappa += dx/this->t_KZ;
+    #endif
 }
 
 /**
@@ -442,8 +451,93 @@ arma::sp_cx_dmat Model::ComputeHamiltonianAfterDX(double dx)
 void Model::RungeKuttaStep()
 {
     // auxiliary complex vectors
-    arma::cx_vec k1, k2, k3, k4;
+    arma::cx_vec k0, k1, k2, k3, k4;
+    k0 = (*this->state);
 
     // compute k1
-    k1 = -1.0j * (*this->hamiltonian) * (*this->state);
+    k1 = -1.0j * (*this->hamiltonian) * (k0);
+    // compute k2
+    this->EvolveHamiltonianByDx(this->deltat/2.0);
+    k2 = -1.0j * (*this->hamiltonian) * (k0 + (this->deltat/2.0) * k1);
+    // compute k3
+    k3 = -1.0j * (*this->hamiltonian) * (k0 + (this->deltat/2.0) * k2);
+    // compute k4
+    this->EvolveHamiltonianByDx(this->deltat/2.0);
+    k4 = -1.0j * (*this->hamiltonian) * (k0 + (this->deltat) * k3);
+
+
+    // compute new state at time t + this->deltat
+    (*this->state) = (*this->state) + (this->deltat/6.0) * (k1 + (2.0 * k2) + (2.0 * k3) + k4);
+    // add deltat to time
+    this->time += this->deltat;
+}
+
+/**
+ * Define the time evolution protocol that will be employed in the simulation.
+ * ------------------------------------
+ * parameters:
+ *              - None
+ * return:
+ *              - None
+*/
+void Model::TimeEvolutionProtocol()
+{
+    // initialize starting parameter for used in the KZ protocol to zero
+    double start_param{0.0};
+    double flag{1.0};
+
+    //**************************** Time evolution *******************************************
+    // if KZ is applied to the transverse field coupling of the Ising chain
+    #ifdef KZ_G
+    start_param = this->g;
+    // flip time if final coupling is smaller than starting coupling
+    if(final_param <= start_param) {this->deltat *= -1.0; flag *= -1.0;}
+    // evolve the system until starting param is equal to final param
+    while ((flag * this->g) < (flag * this->final_param))
+    {
+        // evolve in time
+        this->RungeKuttaStep();
+        // compute observables
+        this->ComputeObservables();
+        // write to file
+        this->WriteObservables();
+    }
+    #endif
+
+
+    // if KZ is applied to qubit hamiltonian
+    #ifdef KZ_LAMBDA
+    start_param = this->lambda;
+    // flip time if final coupling is smaller than starting coupling
+    if(final_param <= start_param) {this->deltat *= -1.0; flag *= -1.0;}
+    // evolve the system until starting param is equal to final param
+    while ((flag * this->lambda) < (flag * this->final_param))
+    {
+        // evolve in time
+        this->RungeKuttaStep();
+        // compute observables
+        this->ComputeObservables();
+        // write to file
+        this->WriteObservables();
+    }
+    #endif
+
+
+    // if KZ is applied to the interaction term between the qubit and the Ising chain
+    #ifdef KZ_KAPPA
+    start_param = this->kappa;
+    // flip time if final coupling is smaller than starting coupling
+    if(final_param <= start_param) {this->deltat *= -1.0; flag *= -1.0;}
+    // evolve the system until starting param is equal to final param
+    while ((flag * this->kappa) < (flag * this->final_param))
+    {
+        // evolve in time
+        this->RungeKuttaStep();
+        // compute observables
+        this->ComputeObservables();
+        // write to file
+        this->WriteObservables();
+    }
+    #endif
+    //***************************************************************************************
 }

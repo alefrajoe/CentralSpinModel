@@ -14,6 +14,7 @@ class Model
     double deltat;
     double time;
     double t_KZ;
+    double final_param;
     int interaction_spin;
     int interaction_chain;
 
@@ -52,8 +53,9 @@ class Model
     void WriteObservables();
 
     // time evolution
-    arma::sp_cx_dmat ComputeHamiltonianAfterDX(double dx);
+    void EvolveHamiltonianByDx(double dx);
     void RungeKuttaStep();
+    void TimeEvolutionProtocol();
 };
 
 #endif
