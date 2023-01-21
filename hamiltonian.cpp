@@ -51,6 +51,7 @@ Model::Model(int argc, char **argv)
     
     // initialize observables
     for(int i=0; i<3; i++) this->magObs[i] = 0.0;
+    this->adiabaticity = 0.0;
 
     // create the directory where data will be saved (if it doesn't exist)
     std::string directory{"data_centralspin"};
@@ -89,14 +90,18 @@ Model::Model(int argc, char **argv)
         exit(1);
     }
     // create filename
-    this->filename = "data_centralspin/data" + inter_string + std::to_string(this->g) + "g" + std::to_string(this->lambda) + "lambda" + std::to_string(this->kappa) + "kappa" + std::to_string(this->L) + "L" + std::to_string(this->t_KZ) + "tKZ" + ".txt";
+    this->filename = "data_centralspin/data" + inter_string + std::to_string(this->g) + "g" + std::to_string(this->lambda) + "lambda" + std::to_string(this->kappa) + "kappa" + std::to_string(this->L) + "L" + std::to_string(this->t_KZ) + "tKZ" + std::to_string(this->deltat) + "dt" + ".txt";
 
     // open file inside directory and write first line
     // create ofstream variable
     std::ofstream outfile;
     // open file
     outfile.open(this->filename, std::ios_base::app); 
-    outfile << "#L   g   lambda  kappa  time  t_KZ   magx    magy    magz" << std::endl;
+    outfile << "#L   g   lambda  kappa  time  t_KZ   magx    magy    magz";
+    #ifdef OBS_ADIABATICITY
+    outfile << "    adiabaticity";
+    #endif
+    outfile << std::endl;
     // close file
     outfile.close();
 }
@@ -326,7 +331,7 @@ void Model::AddHamiltonian()
  * parameters:
  *              - arma::cx_vec *vec : vector where the groundstate of the hamiltonian will be saved
 */
-void Model::GroundStateAndEigenvals(arma::cx_vec *vec)
+void Model::GroundStateAndEigenvals(arma::cx_vec *vec, bool replace_eigavals)
 {
     // auxiliary matrix
     arma::cx_vec eigenvalues;
@@ -338,12 +343,12 @@ void Model::GroundStateAndEigenvals(arma::cx_vec *vec)
     // save the groundstate
     (*vec) = eigvec.col(0);
 
-    // save eigenvalues into the model
-    this->eigenvalues[0] = eigenvalues.at(0).real();
-    this->eigenvalues[1] = eigenvalues.at(1).real();
-
-    // print gap
-    std::cout << "gap is " << this->eigenvalues[1] - this->eigenvalues[0] << std::endl; 
+    if(replace_eigavals)
+    {
+        // save eigenvalues into the model
+        this->eigenvalues[0] = eigenvalues.at(0).real();
+        this->eigenvalues[1] = eigenvalues.at(1).real();
+    }
 }
 
 /**
@@ -369,6 +374,25 @@ double Model::ExpectationValueOfOperatorOnState(arma::sp_cx_dmat *op)
 }
 
 /**
+ * The function returns the adiabaticity between the current state and the ground state that corresponds to
+ * the current hamiltonian.
+*/
+double Model::ComputeAdiabaticity()
+{
+    // initialize adiavaticity measure
+    std::complex<double> adiabaticity{0.0};
+    arma::cx_vec auxiliary(pow(2, this->L+1));
+
+    // compute the current eigenvector and save to auxiliary variable
+    this->GroundStateAndEigenvals(&auxiliary, false);
+
+    // compute scalar product between current GS and the state
+    for(int i=0; i<pow(2, this->L+1); i++) adiabaticity += conj(auxiliary.at(i)) * (this->state->at(i));
+
+    return abs(adiabaticity);
+}
+
+/**
  * Compute all observables on the current state.
  * The observables to be observed are contrelled from the macro file.
  * ------------------------------------
@@ -383,6 +407,9 @@ void Model::ComputeObservables()
     this->magObs[0] = this->ExpectationValueOfOperatorOnState(this->magx);
     this->magObs[1] = this->ExpectationValueOfOperatorOnState(this->magy);
     this->magObs[2] = this->ExpectationValueOfOperatorOnState(this->magz);
+    #endif
+    #ifdef OBS_ADIABATICITY
+    this->adiabaticity = this->ComputeAdiabaticity();
     #endif
 }
 
@@ -405,7 +432,12 @@ void Model::WriteObservables()
 
     // write all observables to file
     outfile << this->L << "\t" << std::setprecision(8) <<  this->g << "\t" << std::setprecision(8) <<  this->lambda << "\t" << std::setprecision(8) <<  this->kappa << "\t" << std::setprecision(8) <<  this->time << "\t" << std::setprecision(8) <<  this->t_KZ << "\t";
+    #ifdef OBS_MAG
     for(int i=0; i<3; i++) outfile << std::setprecision(16) << this->magObs[i] << "\t";
+    #endif
+    #ifdef OBS_ADIABATICITY
+    outfile << std::setprecision(16) << this->adiabaticity << "\t";
+    #endif
     outfile << std::endl;
 
     // close file

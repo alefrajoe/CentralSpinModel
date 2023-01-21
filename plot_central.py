@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 
 ###################################################################
 #                 Plot parameters
-x = 'time'
+x = 'kappa'
 y = 'magz'
 ###################################################################
 
@@ -27,8 +27,10 @@ for file in FILES:
         obs = f.readline()[1:].split()
         print("Available observables are :", obs)
         # load data
-        data = np.loadtxt(DIR + '\\' + file, unpack=False)
+        data = np.loadtxt(DIR + '\\' + file, unpack=True)
         
+        # define useful paramters
+        L = data[obs.index('L')]
         # plot the data
         plt.plot(data[obs.index(x)], data[obs.index(y)])
         plt.xlabel(x)

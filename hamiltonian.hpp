@@ -25,6 +25,7 @@ class Model
 
     // groundstate properties
     double eigenvalues[2];
+    double adiabaticity;
     arma::cx_vec *state;
 
     // observables
@@ -45,10 +46,11 @@ class Model
     void AddHamiltonian();
 
     // diagonalization
-    void GroundStateAndEigenvals(arma::cx_vec *vec);
+    void GroundStateAndEigenvals(arma::cx_vec *vec, bool replace_eigvals);
 
     // compute or write observables
     double ExpectationValueOfOperatorOnState(arma::sp_cx_dmat *op);
+    double ComputeAdiabaticity();
     void ComputeObservables();
     void WriteObservables();
 

@@ -17,7 +17,7 @@ The parameters to be passed to the program are
 - **a**: int - interaction term for the qubit $\sim \hat{\Sigma}^{(a)}$, it can be $a=1,2,3$.
 - **b**: int - interaction term for the chain $\sim \hat{\sigma}^{(b)}$, it can be $b=1,2,3$.
 - **$t_{KZ}$**: double - typical timescale over which the coupling in the KZ protocol is changed.
-                        The coupling is $C=g,\lambda, \text{or} \kappa$, and it is changed with time as
+                        The coupling is $C=g,\lambda$ or $\kappa$, and it is changed linearly with time as
                         $C\to C+t/t_{KZ}$. 
 
 # Observables

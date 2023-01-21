@@ -15,7 +15,7 @@ int main(int argc, char **argv)
 
     // ********** construct the hamiltonian and compute the Ground State ************* 
     model.AddHamiltonian();
-    model.GroundStateAndEigenvals(model.state);
+    model.GroundStateAndEigenvals(model.state, true);
 
     // ************   Kibble - Zurek  **************************
     model.TimeEvolutionProtocol();
