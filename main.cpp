@@ -7,7 +7,7 @@ using namespace arma;
 int main(int argc, char **argv)
 {
     std::cout << std::setprecision(16); 
-    
+
     // *********** Read parameters from input **********
     // read parameters from **argv
     // create the model

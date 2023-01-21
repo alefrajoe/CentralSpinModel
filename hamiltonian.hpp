@@ -44,9 +44,10 @@ class Model
     // diagonalization
     void GroundStateAndEigenvals(arma::cx_vec *vec);
 
-    // compute observables
+    // compute or write observables
     double ExpectationValueOfOperatorOnState(arma::sp_cx_dmat *op);
     void ComputeObservables();
+    void WriteObservables();
 };
 
 #endif

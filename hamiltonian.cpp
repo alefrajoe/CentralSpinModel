@@ -48,8 +48,53 @@ Model::Model(int argc, char **argv)
     // initialize observables
     for(int i=0; i<3; i++) this->magObs[i] = 0.0;
 
+    // create the directory where data will be saved (if it doesn't exist)
+    std::string directory{"data_centralspin"};
+    std::experimental::filesystem::create_directory(directory);
+
+    // create substring for the interaction
+    std::string inter_string{""};
+    switch (this->interaction_spin)
+    {
+    case 1:
+        inter_string+="X";
+        break;
+    case 2:
+        inter_string+="Y";
+        break;
+    case 3:
+        inter_string+="Z";
+        break;
+    default:
+        std::cout << "Error interaction spin passed!" << std::endl;
+        exit(1);
+    }
+    switch (this->interaction_chain)
+    {
+    case 1:
+        inter_string+="X";
+        break;
+    case 2:
+        inter_string+="Y";
+        break;
+    case 3:
+        inter_string+="Z";
+        break;
+    default:
+        std::cout << "Error interaction chain passed!" << std::endl;
+        exit(1);
+    }
     // create filename
-    this->filename = "data_central_spin/data" + std::to_string(this->g) + "g" + std::to_string(this->lambda) + "lambda" + std::to_string(this->kappa) + "kappa" + std::to_string(this->L) + "L.txt";
+    this->filename = "data_centralspin/data" + inter_string + std::to_string(this->g) + "g" + std::to_string(this->lambda) + "lambda" + std::to_string(this->kappa) + "kappa" + std::to_string(this->L) + "L.txt";
+
+    // open file inside directory and write first line
+    // create ofstream variable
+    std::ofstream outfile;
+    // open file
+    outfile.open(this->filename, std::ios_base::app); 
+    outfile << "#   L   g   lambda  kappa   magx    magy    magz" << std::endl;
+    // close file
+    outfile.close();
 }
 
 /**
@@ -333,4 +378,25 @@ void Model::ComputeObservables()
     this->magObs[1] = this->ExpectationValueOfOperatorOnState(this->magy);
     this->magObs[2] = this->ExpectationValueOfOperatorOnState(this->magz);
     #endif
+}
+
+/**
+ * Write all the observables in the txt file.
+ * The file is closed before the function ends.
+ * ------------------------------------
+ * parameters:
+ *              - None
+ * return:
+ *              - None
+*/
+void Model::WriteObservables()
+{
+    // create ofstream variable
+    std::ofstream outfile;
+    
+    // open file
+    outfile.open(this->filename, std::ios_base::app); 
+
+    // close file
+    outfile.close();
 }
