@@ -32,14 +32,18 @@ After compiling the code as described above, you can run a simulation passing th
 # Observables
 We focus on the density matrix of the central spin to study our system.
 To this purpose, we first point out that the density matrix $\rho$ can be written as follows
-$$\rho=\frac{1}{2}(\mathbb{1}+\langle\vec{\Sigma}\rangle\cdot\vec{\Sigma})$$.
+$$\rho=\frac{1}{2}\bigg(\mathbb{1}+\langle\vec{\Sigma}\rangle\cdot\vec{\Sigma}\bigg)$$.
 Thus all quantities for the central spin can be obtained from the magnetizations along the three directions $\langle\vec{\Sigma}\rangle$.
 The simulation returns
 - **Central spin magnetization** $m^{(i)}(t)$:
+> \# magx, magy, magz
 $$\langle \Sigma^{(i)} \rangle, \ \text{for} \ i=1,2,3$$
 - **Adiabaticity** $A(t)$:
+> \# adiabaticity
 $$A(t) = |\braket{\Omega_{\{C_i\}}|\psi(t)}|$$
 where $\ket{\Omega_{\{C_i\}}}$ is the ground state of the hamiltonian with parameters $\{C_i\}$, i.e., the current hamiltonian.
 - **Decoherence** $D(t)$
 $$D(t) = 1 - \text{Tr}\rho^2(t)$$
-where $\rho$ is the density matrix of the central spin.
+where $\rho$ is the density matrix of the central spin. The decoherence is not computed directly by this code.
+However, note that
+$$D(t)=\frac{1}{2}(1-\langle\vec{\Sigma}\rangle^2)$$
