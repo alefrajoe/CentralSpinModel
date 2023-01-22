@@ -34,7 +34,7 @@ We consider the following observables
 - **Central spin magnetization** $m^{(i)}(t)$:
 $$\langle \Sigma^{(i)} \rangle, \ \text{for} \ i=1,2,3$$
 - **Adiabaticity** $A(t)$:
-$$A(t) = |\bra{\Omega_{\{C_i\}}}\ket{\psi(t)}|$$
+$$A(t) = |\braket{\Omega_{\{C_i\}}}{\psi(t)}|$$
 where $\ket{\Omega_{\{C_i\}}}$ is the ground state of the hamiltonian with parameters $\{C_i\}$, i.e., the current hamiltonian.
 - **Decoherence** $D(t)$
 $$D(t) = 1 - \text{Tr}\rho^2(t)$$
