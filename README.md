@@ -44,7 +44,7 @@ Magnetizations along the three directions of the current state.
 - **Ground state Central spin magnetization** $\langle \Sigma^{(i)}_{GS}(t)\rangle$:
 > \# magGSx, magGSy, magGSz
 
-$$\langle \Sigma^{(i)} \rangle, \ \text{for} \ i=1,2,3$$
+$$\langle \Sigma^{(i)}_{GS} \rangle, \ \text{for} \ i=1,2,3$$
 
 Magnetizations along the three directions for the ground state corresponding to the current hamiltonian paramters.
 - **Adiabaticity** $A(t)$:
