@@ -11,17 +11,30 @@
 */
 Model::Model(int argc, char **argv)
 {
+    // for all arguments passed
+    for(int i=0; i<argc; i++)
+    {
+        // if argument has a odd position
+        if(i%2 == 1)
+        {
+            // transform the *char to string
+            std::string temp{argv[i]};
+            // transform string to lower
+            for(int i=0; i<temp.length(); i++) {temp[i] = std::tolower(temp[i]);}
+            if (temp.compare("l") == 0) this->L = atoi(argv[i+1]);
+            else if (temp.compare("g") == 0) this->g = atof(argv[i+1]);
+            else if (temp.compare("lambda") == 0) this->lambda = atof(argv[i+1]);
+            else if (temp.compare("kappa") == 0) this->kappa = atof(argv[i+1]);
+            else if (temp.compare("a") == 0) this->interaction_spin = atoi(argv[i+1]);
+            else if (temp.compare("b") == 0) this->interaction_chain = atoi(argv[i+1]);
+            else if (temp.compare("dt") == 0) this->deltat = atof(argv[i+1]);
+            else if (temp.compare("tkz") == 0) this->t_KZ = atof(argv[i+1]);
+            else if (temp.compare("end") == 0) this->final_param = atof(argv[i+1]);
+            else {std::cout << "This parameter is not allowed!" << std::endl; exit(1);}
+        }
+    }
     // initialize all parameters required for the simulation
-    this->L = atoi(argv[1]);
-    this->g = atof(argv[2]);
-    this->lambda = atof(argv[3]);
-    this->kappa = atof(argv[4]);
-    this->interaction_spin = atoi(argv[5]);
-    this->interaction_chain = atoi(argv[6]);
-    this->deltat = atof(argv[7]);
-    this->t_KZ = atof(argv[8]);
     this->time = 0.0;
-    this->final_param = atof(argv[9]);
     
     // initialize the hamiltonian
     // the 1^st spin is the central qubit

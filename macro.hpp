@@ -9,6 +9,7 @@
 #include <limits>
 #include <armadillo>
 #include <string>
+
 /**
  * Define boundary conditions to be implemented.
  */
@@ -19,9 +20,9 @@
  * Kibble-Zurek parameter:
  * Choose the parameter to which KZ is applied
 */
-#define KZ_G
+//#define KZ_G
 //#define KZ_LAMBDA
-//#define KZ_KAPPA
+#define KZ_KAPPA
 
 /**
  * Observables taken into account.
