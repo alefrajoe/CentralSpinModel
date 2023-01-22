@@ -19,7 +19,7 @@ The parameters to be passed to the program are
 - **$t_{KZ}$** (**tkz**): double - typical timescale over which the coupling in the KZ protocol is changed.
                         The coupling is $C=g,\lambda$ or $\kappa$, and it is changed linearly with time as
                         $C\to C+t/t_{KZ}$.
-- **$\delta$t** (**dt**): double - infinitesimal time step for $4^{th}$-order the Runge-Kutta algorithm. It should always
+- **$\delta$ t** (**dt**): double - infinitesimal time step for $4^{th}$-order the Runge-Kutta algorithm. It should always
                                     be a positive number independently of end.
 - **end** (**end**): double - last coupling to be simulated. The time evolution stops as soon as the coupling is equal to 
                     this parameter. The coupling changed during the KZ protocol is controlled in *macro.h*.
