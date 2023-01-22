@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 ###################################################################
 #                 Plot parameters
 x = 'kappa'
-y = 'magz'
+y = 'magy'
 ###################################################################
 
 # define the directory where all data are stored
@@ -31,8 +31,16 @@ for file in FILES:
         
         # define useful paramters
         L = data[obs.index('L')]
+        if 'magx' in obs:
+            magx = data[obs.index('magx')]
+            magy = data[obs.index('magy')]
+            magz = data[obs.index('magz')]
+        if 'magGSx' in obs:
+            maggsx = data[obs.index('magGSx')] 
+            maggsy = data[obs.index('magGSy')] 
+            maggsz = data[obs.index('magGSz')] 
         # plot the data
-        plt.plot(data[obs.index(x)], data[obs.index(y)])
+        plt.plot(data[obs.index(x)], (1+(magx*maggsx+magy*maggsy+magz*maggsz))/2.0)
         plt.xlabel(x)
         plt.ylabel(y)
 

@@ -30,7 +30,11 @@ After compiling the code as described above, you can run a simulation passing th
 > ./central L 6 g 1.1 lambda 0.5 kappa 1 a 1 b 1 tkz 50 dt 0.002 end 1.5
 
 # Observables
-We consider the following observables
+We focus on the density matrix of the central spin to study our system.
+To this purpose, we first point out that the density matrix $\rho$ can be written as follows
+$$\rho=\frac{1}{2}(\mathbb{1}+\langle\vec{\Sigma}\rangle\cdot\vec{\Sigma})$$.
+Thus all quantities for the central spin can be obtained from the magnetizations along the three directions $\langle\vec{\Sigma}\rangle$.
+The simulation returns
 - **Central spin magnetization** $m^{(i)}(t)$:
 $$\langle \Sigma^{(i)} \rangle, \ \text{for} \ i=1,2,3$$
 - **Adiabaticity** $A(t)$:

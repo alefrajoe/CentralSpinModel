@@ -63,7 +63,7 @@ Model::Model(int argc, char **argv)
     this->state = new arma::cx_vec(pow(2, this->L+1));
     
     // initialize observables
-    for(int i=0; i<3; i++) this->magObs[i] = 0.0;
+    for(int i=0; i<3; i++) {this->magObs[i] = 0.0; this->maggroundObs[i] = 0.0;}
     this->adiabaticity = 0.0;
 
     // create the directory where data will be saved (if it doesn't exist)
@@ -112,7 +112,7 @@ Model::Model(int argc, char **argv)
     outfile.open(this->filename, std::ios_base::app); 
     outfile << "#L   g   lambda  kappa  time  t_KZ   magx    magy    magz";
     #ifdef OBS_ADIABATICITY
-    outfile << "    adiabaticity";
+    outfile << "    magGSx  magGSy  magGSz  adiabaticity";
     #endif
     outfile << std::endl;
     // close file
@@ -373,15 +373,15 @@ void Model::GroundStateAndEigenvals(arma::cx_vec *vec, bool replace_eigavals)
  * return:
  *              - double : return a real number equal to <state| *op | state> 
 */
-double Model::ExpectationValueOfOperatorOnState(arma::sp_cx_dmat *op)
+double Model::ExpectationValueOfOperatorOnState(arma::sp_cx_dmat *op, arma::cx_vec *vec)
 {
     std::complex<double> expval{0.0};
     
     // compute temp = *op | state> 
-    arma::cx_vec temp = (*op) * (*this->state);
+    arma::cx_vec temp = (*op) * (*vec);
 
     // compute <state | temp>
-    for(int i=0; i<pow(2, this->L+1); i++) expval += conj(this->state->at(i)) * temp.at(i);
+    for(int i=0; i<pow(2, this->L+1); i++) expval += conj(vec->at(i)) * temp.at(i);
 
     return expval.real();
 }
@@ -402,6 +402,11 @@ double Model::ComputeAdiabaticity()
     // compute scalar product between current GS and the state
     for(int i=0; i<pow(2, this->L+1); i++) adiabaticity += conj(auxiliary.at(i)) * (this->state->at(i));
 
+    // compute the magnetization of the auxiliary ground state
+    this->maggroundObs[0] = this->ExpectationValueOfOperatorOnState(this->magx, &auxiliary);
+    this->maggroundObs[1] = this->ExpectationValueOfOperatorOnState(this->magy, &auxiliary);
+    this->maggroundObs[2] = this->ExpectationValueOfOperatorOnState(this->magz, &auxiliary);
+
     return abs(adiabaticity);
 }
 
@@ -417,9 +422,9 @@ double Model::ComputeAdiabaticity()
 void Model::ComputeObservables()
 {
     #ifdef OBS_MAG
-    this->magObs[0] = this->ExpectationValueOfOperatorOnState(this->magx);
-    this->magObs[1] = this->ExpectationValueOfOperatorOnState(this->magy);
-    this->magObs[2] = this->ExpectationValueOfOperatorOnState(this->magz);
+    this->magObs[0] = this->ExpectationValueOfOperatorOnState(this->magx, this->state);
+    this->magObs[1] = this->ExpectationValueOfOperatorOnState(this->magy, this->state);
+    this->magObs[2] = this->ExpectationValueOfOperatorOnState(this->magz, this->state);
     #endif
     #ifdef OBS_ADIABATICITY
     this->adiabaticity = this->ComputeAdiabaticity();
@@ -449,6 +454,7 @@ void Model::WriteObservables()
     for(int i=0; i<3; i++) outfile << std::setprecision(16) << this->magObs[i] << "\t";
     #endif
     #ifdef OBS_ADIABATICITY
+    for(int i=0; i<3; i++) outfile << std::setprecision(16) << this->maggroundObs[i] << "\t";
     outfile << std::setprecision(16) << this->adiabaticity << "\t";
     #endif
     outfile << std::endl;
@@ -538,16 +544,16 @@ void Model::TimeEvolutionProtocol()
     #ifdef KZ_G
     start_param = this->g;
     // flip time if final coupling is smaller than starting coupling
-    if(final_param <= start_param) {this->deltat *= -1.0; flag *= -1.0;}
+    if(final_param <= start_param) {this->t_KZ *= -1.0; flag *= -1.0;}
     // evolve the system until starting param is equal to final param
-    while ((flag * this->g) < (flag * this->final_param))
+    while ((flag * this->g) <= (flag * this->final_param))
     {
-        // evolve in time
-        this->RungeKuttaStep();
         // compute observables
         this->ComputeObservables();
         // write to file
         this->WriteObservables();
+        // evolve in time
+        this->RungeKuttaStep();
     }
     #endif
 
@@ -556,16 +562,16 @@ void Model::TimeEvolutionProtocol()
     #ifdef KZ_LAMBDA
     start_param = this->lambda;
     // flip time if final coupling is smaller than starting coupling
-    if(final_param <= start_param) {this->deltat *= -1.0; flag *= -1.0;}
+    if(final_param <= start_param) {this->t_KZ *= -1.0; flag *= -1.0;}
     // evolve the system until starting param is equal to final param
-    while ((flag * this->lambda) < (flag * this->final_param))
+    while ((flag * this->lambda) <= (flag * this->final_param))
     {
-        // evolve in time
-        this->RungeKuttaStep();
         // compute observables
         this->ComputeObservables();
         // write to file
         this->WriteObservables();
+        // evolve in time
+        this->RungeKuttaStep();
     }
     #endif
 
@@ -574,17 +580,68 @@ void Model::TimeEvolutionProtocol()
     #ifdef KZ_KAPPA
     start_param = this->kappa;
     // flip time if final coupling is smaller than starting coupling
-    if(final_param <= start_param) {this->deltat *= -1.0; flag *= -1.0;}
+    if(final_param <= start_param) {this->t_KZ *= -1.0; flag *= -1.0;}
     // evolve the system until starting param is equal to final param
-    while ((flag * this->kappa) < (flag * this->final_param))
+    while ((flag * this->kappa) <= (flag * this->final_param))
     {
-        // evolve in time
-        this->RungeKuttaStep();
         // compute observables
         this->ComputeObservables();
         // write to file
         this->WriteObservables();
+        // evolve in time
+        this->RungeKuttaStep();
     }
     #endif
+
     //***************************************************************************************
+    // if ROUND_TRIP is defined then come back to the starting parameters
+    #ifdef ROUND_TRIP
+    // change t_KZ and the flag parameters
+    this->t_KZ *= -1.0; flag *= -1.0;
+
+
+    // if KZ is applied to the transverse field coupling of the Ising chain
+    #ifdef KZ_G
+    // evolve the system until starting param is equal to final param
+    while ((flag * this->g) <= (flag * start_param))
+    {
+        // compute observables
+        this->ComputeObservables();
+        // write to file
+        this->WriteObservables();
+        // evolve in time
+        this->RungeKuttaStep();
+    }
+    #endif
+
+
+    // if KZ is applied to qubit hamiltonian
+    #ifdef KZ_LAMBDA
+    // evolve the system until starting param is equal to final param
+    while ((flag * this->lambda) <= (flag * start_param))
+    {
+        // compute observables
+        this->ComputeObservables();
+        // write to file
+        this->WriteObservables();
+        // evolve in time
+        this->RungeKuttaStep();
+    }
+    #endif
+
+
+    // if KZ is applied to the interaction term between the qubit and the Ising chain
+    #ifdef KZ_KAPPA
+    // evolve the system until starting param is equal to final param
+    while ((flag * this->kappa) <= (flag * start_param))
+    {
+        // compute observables
+        this->ComputeObservables();
+        // write to file
+        this->WriteObservables();
+        // evolve in time
+        this->RungeKuttaStep();
+    }
+    #endif
+    #endif
 }

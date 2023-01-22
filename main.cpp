@@ -18,7 +18,11 @@ int main(int argc, char **argv)
     model.GroundStateAndEigenvals(model.state, true);
 
     // ************   Kibble - Zurek  **************************
-    model.TimeEvolutionProtocol();
+    for(int i=0; i<N_CYCLES; i++) model.TimeEvolutionProtocol();
+    // compute observables also at the end of the simulation
+    model.ComputeObservables();
+    // write to file also at the end of the simulation
+    model.WriteObservables();
 
     // return exit success
     return 0;

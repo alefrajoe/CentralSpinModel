@@ -30,6 +30,7 @@ class Model
 
     // observables
     double magObs[3];
+    double maggroundObs[3];
 
     // filename and hamiltonian
     std::string filename;
@@ -49,7 +50,7 @@ class Model
     void GroundStateAndEigenvals(arma::cx_vec *vec, bool replace_eigvals);
 
     // compute or write observables
-    double ExpectationValueOfOperatorOnState(arma::sp_cx_dmat *op);
+    double ExpectationValueOfOperatorOnState(arma::sp_cx_dmat *op, arma::cx_vec *vec);
     double ComputeAdiabaticity();
     void ComputeObservables();
     void WriteObservables();

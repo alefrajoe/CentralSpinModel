@@ -17,12 +17,18 @@
 //#define APBC
 
 /**
+ * If ROUND_TRIP is defined, stop the KZ protocol when the parameters are all the same as the starting ones.
+*/
+#define ROUND_TRIP
+#define N_CYCLES (2)
+
+/**
  * Kibble-Zurek parameter:
  * Choose the parameter to which KZ is applied
 */
-//#define KZ_G
+#define KZ_G
 //#define KZ_LAMBDA
-#define KZ_KAPPA
+//#define KZ_KAPPA
 
 /**
  * Observables taken into account.
