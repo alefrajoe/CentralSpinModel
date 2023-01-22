@@ -25,7 +25,7 @@ The parameters to be passed to the program are
                     this value. The coupling changed during the KZ protocol is controlled in *macro.h*.
                     The value of the end parameter could be either larger or smaller than the starting parameter.
 
-After compiling the code as described above, you can run a simulation passing the parameter name (the one inside the round brackets) and the value for that observables. For instance, to run the program with $L=6, g=1.1, \lambda=0.5, \kappa=1, a=1, b=1, t_{KZ}=50, \delta t=0.002, end=1.5$ launch
+After compiling the code as described above, you can run a simulation passing the parameter name (the one inside the round brackets) and the value for that observables. For instance, to run the program with $L=6, g=1.1, \lambda=0.5, \kappa=1, a=1, b=1, t_{KZ}=50, \delta t=0.002, end=1.5$
 
 > ./central L 6 g 1.1 lambda 0.5 kappa 1 a 1 b 1 tkz 50 dt 0.002 end 1.5
 
@@ -35,11 +35,16 @@ To this purpose, we first point out that the density matrix $\rho$ can be writte
 $$\rho=\frac{1}{2}\bigg(\mathbb{1}+\langle\vec{\Sigma}\rangle\cdot\vec{\Sigma}\bigg)$$.
 Thus all quantities for the central spin can be obtained from the magnetizations along the three directions $\langle\vec{\Sigma}\rangle$.
 The simulation returns
-- **Central spin magnetization** $m^{(i)}(t)$:
+- **Central spin magnetization** $\langle \Sigma^{(i)}(t)\rangle$:
 > \# magx, magy, magz
+
+- **Ground state Central spin magnetization** $\langle \Sigma^{(i)}_{GS}(t)\rangle$:
+> \# magGSx, magGSy, magGSz
+
 $$\langle \Sigma^{(i)} \rangle, \ \text{for} \ i=1,2,3$$
 - **Adiabaticity** $A(t)$:
 > \# adiabaticity
+
 $$A(t) = |\braket{\Omega_{\{C_i\}}|\psi(t)}|$$
 where $\ket{\Omega_{\{C_i\}}}$ is the ground state of the hamiltonian with parameters $\{C_i\}$, i.e., the current hamiltonian.
 - **Decoherence** $D(t)$
