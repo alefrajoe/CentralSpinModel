@@ -35,6 +35,9 @@ Model::Model(int argc, char **argv)
     }
     // initialize all parameters required for the simulation
     this->time = 0.0;
+    // if the hamiltonian comprehends \sim\sigma^{(2)} interactions
+    if(this->interaction_spin == 2 | this->interaction_chain == 2) this->real_or_complex = "complex";
+    else this->real_or_complex = "real";
     
     // initialize the hamiltonian
     // the 1^st spin is the central qubit
@@ -351,16 +354,49 @@ void Model::GroundStateAndEigenvals(arma::cx_vec *vec, bool replace_eigavals)
     arma::cx_mat eigvec;
 
     // compute lowest eigenvalues and eigenvectors
-    arma::eigs_gen(eigenvalues, eigvec, (*this->hamiltonian), 2, "sr");
-
-    // save the groundstate
-    (*vec) = eigvec.col(0);
-
-    if(replace_eigavals)
+    // use always complex diagonalization
+    // if you want to apply symmetric diagonalization for symmetric matrices compare to "real"
+    if(this->real_or_complex == "real")
     {
-        // save eigenvalues into the model
-        this->eigenvalues[0] = eigenvalues.at(0).real();
-        this->eigenvalues[1] = eigenvalues.at(1).real();
+        arma::vec eigvals;
+        arma::dmat eigvectors;
+        arma::sp_dmat real_hamiltonian(pow(2, this->L+1), pow(2, this->L+1));
+        // copy the hamiltonian
+        for(auto it=this->hamiltonian->begin(); it != this->hamiltonian->end(); ++it){real_hamiltonian(it.row(), it.col()) = (*it).real();}
+        // diagonalize the hamiltonian
+        arma::eigs_sym(eigvals, eigvectors, real_hamiltonian, 2, "sa");
+        // change eigenvalues if 
+        for(int i=0; i<pow(2, this->L+1); i++) vec->at(i) = eigvectors.col(0)(i);
+        // put eigenvalues into the model
+        if(replace_eigavals)
+        {
+            // save eigenvalues into the model
+            this->eigenvalues[0] = eigvals.at(0);
+            this->eigenvalues[1] = eigvals.at(1);
+        }
+
+    }
+    // else 
+    else
+    {
+        // diagonalize the hamiltonian
+        arma::eigs_gen(eigenvalues, eigvec, (*this->hamiltonian), 2, "sr");
+
+        // ground state index: starting is zero
+        int indexGS = 0;
+        // if the true groundstate is the second vector
+        if(eigenvalues.at(1).real() < eigenvalues.at(0).real()) indexGS = 1;
+        // save the groundstate
+        (*vec) = eigvec.col(indexGS)/norm(eigvec.col(indexGS));
+        
+
+        // put eigenvalues into the model
+        if(replace_eigavals)
+        {
+            // save eigenvalues into the model
+            this->eigenvalues[0] = eigenvalues.at(0).real();
+            this->eigenvalues[1] = eigenvalues.at(1).real();
+        }
     }
 }
 

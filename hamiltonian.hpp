@@ -35,6 +35,7 @@ class Model
     // filename and hamiltonian
     std::string filename;
     arma::sp_cx_dmat *hamiltonian;
+    std::string real_or_complex;
 
     // initializer
     Model(int argc, char **argv);

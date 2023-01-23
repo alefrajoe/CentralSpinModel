@@ -19,8 +19,8 @@
 /**
  * If ROUND_TRIP is defined, stop the KZ protocol when the parameters are all the same as the starting ones.
 */
-#define ROUND_TRIP
-#define N_CYCLES (2)
+//#define ROUND_TRIP
+#define N_CYCLES (1)
 
 /**
  * Kibble-Zurek parameter:
