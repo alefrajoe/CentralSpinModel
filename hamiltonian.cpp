@@ -11,6 +11,19 @@
 */
 Model::Model(int argc, char **argv)
 {
+    // initialize all paramters to zero
+    // this is a safe way to initialize all parameters even if they are not passed to the function
+    this->L = 0;
+    this->g = 0.0;
+    this->lambda = 0.0;
+    this->kappa = 0.0;
+    this->h = 0.0;
+    this->interaction_spin = 0;
+    this->interaction_chain = 0;
+    this->deltat = 0.0;
+    this->t_KZ = 0.0;
+    this->final_param = 0.0;
+
     // for all arguments passed
     for(int i=0; i<argc; i++)
     {
@@ -25,6 +38,7 @@ Model::Model(int argc, char **argv)
             else if (temp.compare("g") == 0) this->g = atof(argv[i+1]);
             else if (temp.compare("lambda") == 0) this->lambda = atof(argv[i+1]);
             else if (temp.compare("kappa") == 0) this->kappa = atof(argv[i+1]);
+            else if (temp.compare("h") == 0) this->h = atof(argv[i+1]);
             else if (temp.compare("a") == 0) this->interaction_spin = atoi(argv[i+1]);
             else if (temp.compare("b") == 0) this->interaction_chain = atoi(argv[i+1]);
             else if (temp.compare("dt") == 0) this->deltat = atof(argv[i+1]);
@@ -170,6 +184,42 @@ void Model::AddTransverseFieldChain(double par)
         {
             // if i == j kron with sigmax
             if(i == j) temp = arma::kron(temp, sigmaz);
+            // else kron with id
+            else temp = arma::kron(temp, id);
+        }
+
+        // add the temp term to the hamiltonian
+        (*this->hamiltonian) = (*this->hamiltonian) - ((par) * temp);
+    }
+}
+
+/**
+ * Add the longitudinal field hamiltonian to the Ising chain to this->hamiltonian.
+ * ------------------------------------
+ * parameters:
+ *              - double : par  - the hamiltonian term is multiplied by par
+*/
+void Model::AddLongitudinalFieldChain(double par)
+{
+    // initialize 2 X 2 identity and sigmaz
+    arma::sp_cx_dmat id(2, 2);
+    id.eye(2, 2);
+    arma::sp_cx_dmat sigmax(2, 2);
+    sigmax(0, 1) = 1.0;
+    sigmax(1, 0) = 1.0;
+
+    // add all L terms to the Ising chain
+    for(int i=0; i<this->L; i++)
+    {
+        // initialize temp to 2 X 2 identity
+        arma::sp_cx_dmat temp(2, 2);
+        temp.eye(2, 2);
+
+        // generate the hamiltonian term
+        for(int j=0; j<this->L; j++)
+        {
+            // if i == j kron with sigmax
+            if(i == j) temp = arma::kron(temp, sigmax);
             // else kron with id
             else temp = arma::kron(temp, id);
         }
@@ -337,6 +387,7 @@ void Model::AddHamiltonian()
     // add all terms of the hamiltonian
     this->AddSpinHamiltonian(this->lambda);
     this->AddTransverseFieldChain(this->g);
+    this->AddLongitudinalFieldChain(this->h);
     this->AddLongitudinalHoppingChain();
     this->AddInteractionCentralSpinAndChain(this->interaction_spin, this->interaction_chain, this->kappa);
 }
@@ -356,7 +407,7 @@ void Model::GroundStateAndEigenvals(arma::cx_vec *vec, bool replace_eigavals)
     // compute lowest eigenvalues and eigenvectors
     // use always complex diagonalization
     // if you want to apply symmetric diagonalization for symmetric matrices compare to "real"
-    if(this->real_or_complex == "real")
+    if(this->real_or_complex == "all")
     {
         arma::vec eigvals;
         arma::dmat eigvectors;
@@ -374,7 +425,6 @@ void Model::GroundStateAndEigenvals(arma::cx_vec *vec, bool replace_eigavals)
             this->eigenvalues[0] = eigvals.at(0);
             this->eigenvalues[1] = eigvals.at(1);
         }
-
     }
     // else 
     else
@@ -679,5 +729,7 @@ void Model::TimeEvolutionProtocol()
         this->RungeKuttaStep();
     }
     #endif
+    // change t_KZ and the flag parameters
+    this->t_KZ *= -1.0; flag *= -1.0;
     #endif
 }

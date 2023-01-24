@@ -11,6 +11,7 @@ class Model
     double g;
     double lambda;
     double kappa;
+    double h;
     double deltat;
     double time;
     double t_KZ;
@@ -43,6 +44,7 @@ class Model
     // hamiltonian terms
     void AddSpinHamiltonian(double par);
     void AddTransverseFieldChain(double par);
+    void AddLongitudinalFieldChain(double par);
     void AddLongitudinalHoppingChain();
     void AddInteractionCentralSpinAndChain(int a, int b, double par);
     void AddHamiltonian();
