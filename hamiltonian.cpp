@@ -9,6 +9,7 @@
  * return:
  *              - None
 */
+//miriam
 Model::Model(int argc, char **argv)
 {
     // initialize all paramters to zero
