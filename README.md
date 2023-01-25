@@ -1,4 +1,6 @@
 # Central Spin Model
+
+# Ciao
 The hamiltonian of the central spin model follows
 
 $$\hat{H}=-J\sum_{i=1}^L\hat{\sigma}^{(1)}_i\hat{\sigma}^{(1)}_{i+1}-g\sum_{i=1}^L\hat{\sigma}^{(3)}_i-h\sum_{i=1}^L\hat{\sigma}^{(1)}_i-\frac{\lambda}{2}\Sigma^{(3)}-\kappa\sum_{i=1}^L\hat{\Sigma}^{(a)}\hat{\sigma}_i^{(b)}$$
@@ -11,8 +13,8 @@ To compile the code
 
 The parameters to be passed to the program are
 - **L** (**L**): int - length of the Ising chain
-- **g** (**g**): double - transverse field coupling of the chain
-- **h** (**h**): double - longitudinal field coupling of the chain
+- **g** (**g**): double - transverse coupling of the chain
+- **h** (**h**): double - longitudinal coupling of the chain
 - **$\lambda$** (**lambda**): double - gap of the single qubit
 - **$\kappa$** (**kappa**): double - interaction strength between the qubit and the chain
 - **a** (**a**): int - interaction term for the qubit $\sim \hat{\Sigma}^{(a)}$, it can be $a=1,2,3$.
