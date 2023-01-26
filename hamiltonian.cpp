@@ -9,7 +9,6 @@
  * return:
  *              - None
 */
-//miriam
 Model::Model(int argc, char **argv)
 {
     // initialize all paramters to zero
@@ -24,6 +23,7 @@ Model::Model(int argc, char **argv)
     this->deltat = 0.0;
     this->t_KZ = 0.0;
     this->final_param = 0.0;
+    this->seed = 0;
 
     // for all arguments passed
     for(int i=0; i<argc; i++)
@@ -45,9 +45,23 @@ Model::Model(int argc, char **argv)
             else if (temp.compare("dt") == 0) this->deltat = atof(argv[i+1]);
             else if (temp.compare("tkz") == 0) this->t_KZ = atof(argv[i+1]);
             else if (temp.compare("end") == 0) this->final_param = atof(argv[i+1]);
+            else if (temp.compare("seed") == 0) this->seed = atoi(argv[i+1]);
             else {std::cout << "This parameter is not allowed!" << std::endl; exit(1);}
         }
     }
+
+    // random number initialization
+    // Use random_device to generate a seed for Mersenne twister engine.
+    std::random_device rd{};    
+
+    // Use Mersenne twister engine to generate pseudo-random numbers.
+    std::mt19937 engine{rd()};
+    this->random_engine = engine;
+    // flush away a number of "RandomUniformDouble()" equal to seed
+    // this action ensures that different runs with different seeds behave differently
+    for(int i=0; i<seed; i++) this->RandomUniformDouble();
+
+
     // initialize all parameters required for the simulation
     this->time = 0.0;
     // if the hamiltonian comprehends \sim\sigma^{(2)} interactions
@@ -398,6 +412,8 @@ void Model::AddHamiltonian()
  * ------------------------------------
  * parameters:
  *              - arma::cx_vec *vec : vector where the groundstate of the hamiltonian will be saved
+ * return:
+ *              - None
 */
 void Model::GroundStateAndEigenvals(arma::cx_vec *vec, bool replace_eigavals)
 {
@@ -449,6 +465,21 @@ void Model::GroundStateAndEigenvals(arma::cx_vec *vec, bool replace_eigavals)
             this->eigenvalues[1] = eigenvalues.at(1).real();
         }
     }
+}
+
+/**
+ * Return a random double in [0, 1] distributed according to a uniform distribution.
+ * ------------------------------------
+ * parameters:
+ *              - None
+ * return:
+ *              - None
+*/
+double Model::RandomUniformDouble()
+{
+    // Generate pseudo-random number.
+    double x = this->uniform_distribution(this->random_engine);
+    return x;
 }
 
 /**

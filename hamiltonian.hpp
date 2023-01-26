@@ -19,6 +19,11 @@ class Model
     int interaction_spin;
     int interaction_chain;
 
+    // random number generator
+    std::mt19937 random_engine;
+    std::uniform_real_distribution<double> uniform_distribution{0.0, 1.0};
+    int seed;
+
     // operators related to the magnetization of the central spin 
     arma::sp_cx_dmat *magx;
     arma::sp_cx_dmat *magy;
@@ -51,6 +56,9 @@ class Model
 
     // diagonalization
     void GroundStateAndEigenvals(arma::cx_vec *vec, bool replace_eigvals);
+
+    // random numbers
+    double RandomUniformDouble();
 
     // compute or write observables
     double ExpectationValueOfOperatorOnState(arma::sp_cx_dmat *op, arma::cx_vec *vec);

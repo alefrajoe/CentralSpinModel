@@ -9,6 +9,7 @@
 #include <limits>
 #include <armadillo>
 #include <string>
+#include <random>
 
 /**
  * Define boundary conditions to be implemented.
