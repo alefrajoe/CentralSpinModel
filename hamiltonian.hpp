@@ -78,6 +78,7 @@ class Model
     void TimeEvolutionProtocol();
 
     // measurement induced dynamics
+    void ComputeMeasurementDirection();
     void ComputeProjectorsAlongDirection();
 };
 

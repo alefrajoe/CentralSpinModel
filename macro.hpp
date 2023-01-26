@@ -32,6 +32,13 @@
 //#define KZ_KAPPA
 
 /**
+ * Measurement dyanmics protocol used
+*/
+#define MEASURE_SIGMAX
+#define MEASURE_SIGMAZ
+#define MEASURE_RANDOM
+
+/**
  * Observables taken into account.
  */
 #define OBS_MAG

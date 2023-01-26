@@ -775,6 +775,41 @@ void Model::TimeEvolutionProtocol()
 }
 
 /**
+ * Compute the direction of the measurement protocol.
+ * The protocol used is controlled by a specfic macro in "macro.hpp".
+ * The direction computed is stored in this->nx, this->ny, this->nz.
+ * ------------------------------------
+ * parameters:
+ *              - None
+ * return:
+ *              - None
+*/
+void Model::ComputeMeasurementDirection()
+{
+    // measurement along sigmax
+    #ifdef MEASURE_SIGMAX
+    this->nx = 1.0;
+    this->ny = 0.0;
+    this->nz = 0.0;
+    #endif
+
+    // measurement along sigmaz
+    #ifdef MEASURE_SIGMAZ
+    this->nx = 0.0;
+    this->ny = 0.0;
+    this->nz = 1.0;
+    #endif 
+
+    // measurement along a random direction
+    #ifdef MEASURE_RANDOM
+    double theta{this->RandomUniformDouble()*PI}, phi{this->RandomUniformDouble()*2.0*PI};
+    this->nx = sin(theta) * cos(phi);
+    this->ny = sin(theta) * sin(phi);
+    this->nz = cos(theta);
+    #endif
+}
+
+/**
  * Compute the up and down spin projector operators along the direction (nx, ny, nz) = (sin\theta cos\phi, sin\theta sin\phi, cos\theta).
  * All the variables needed by this function are stored within the "Model" class.
  * ------------------------------------
