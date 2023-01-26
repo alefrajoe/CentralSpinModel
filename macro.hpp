@@ -41,5 +41,6 @@
  * Define useful macros
  */
 #define PI (3.1415926535897932384626433)
+#define I (std::complex<double> (0.0, 1.0))
 
 #endif

@@ -23,6 +23,12 @@ class Model
     std::mt19937 random_engine;
     std::uniform_real_distribution<double> uniform_distribution{0.0, 1.0};
     int seed;
+    // random measurements
+    double nx;
+    double ny;
+    double nz;
+    arma::cx_dmat up_proj;
+    arma::cx_dmat down_proj;
 
     // operators related to the magnetization of the central spin 
     arma::sp_cx_dmat *magx;
@@ -70,6 +76,9 @@ class Model
     void EvolveHamiltonianByDx(double dx);
     void RungeKuttaStep();
     void TimeEvolutionProtocol();
+
+    // measurement induced dynamics
+    void ComputeProjectorsAlongDirection();
 };
 
 #endif

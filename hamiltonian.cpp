@@ -60,6 +60,14 @@ Model::Model(int argc, char **argv)
     // flush away a number of "RandomUniformDouble()" equal to seed
     // this action ensures that different runs with different seeds behave differently
     for(int i=0; i<seed; i++) this->RandomUniformDouble();
+    // random measurements
+    // initialize \vec{n} along the z axis
+    this->nx = 0.0;
+    this->ny = 0.0;
+    this->nz = 1.0;
+    // set up and down spin projectors to zero
+    this->up_proj.zeros(2, 2);
+    this->down_proj.zeros(2, 2);
 
 
     // initialize all parameters required for the simulation
@@ -764,4 +772,73 @@ void Model::TimeEvolutionProtocol()
     // change t_KZ and the flag parameters
     this->t_KZ *= -1.0; flag *= -1.0;
     #endif
+}
+
+/**
+ * Compute the up and down spin projector operators along the direction (nx, ny, nz) = (sin\theta cos\phi, sin\theta sin\phi, cos\theta).
+ * All the variables needed by this function are stored within the "Model" class.
+ * ------------------------------------
+ * parameters:
+ *              - None
+ * return:
+ *              - None
+*/
+void Model::ComputeProjectorsAlongDirection()
+{
+    // find theta
+    double theta{acos(this->nz)};
+    // if theta is not along the z axis
+    if(theta != 0.0 && theta != acos(1.0))
+    {
+        // find phi
+        double phi{atan(this->ny/this->nx)};
+        // add pi if nx is negative
+        if(this->nx < 0) phi = phi + acos(-1.0);
+
+        // ----------- compute up projector
+        this->up_proj.at(0, 0) = pow(cos(theta/2.0), 2);
+        this->up_proj.at(1, 0) = - sin(theta/2.0) * cos(theta/2.0) * exp(I * phi);
+        this->up_proj.at(0, 1) = - sin(theta/2.0) * cos(theta/2.0) * exp(- I * phi);
+        this->up_proj.at(1, 1) = pow(sin(theta/2.0), 2);
+
+        // ----------- compute down projector
+        this->down_proj.at(0, 0) = pow(sin(theta/2.0), 2);
+        this->down_proj.at(1, 0) = - sin(theta/2.0) * cos(theta/2.0) * exp(- I * phi);
+        this->down_proj.at(0, 1) = - sin(theta/2.0) * cos(theta/2.0) * exp(+ I * phi);
+        this->down_proj.at(1, 1) = pow(cos(theta/2.0), 2);
+    }
+    // if theta is along the z axis 
+    else
+    {
+        // if theta is up
+        if(theta == 0.0)
+        {
+            // ----------- compute up projector
+            this->up_proj.at(0, 0) = 1.0;
+            this->up_proj.at(1, 0) = 0.0;
+            this->up_proj.at(0, 1) = 0.0;
+            this->up_proj.at(1, 1) = 0.0;
+
+            // ----------- compute down projector
+            this->down_proj.at(0, 0) = 0.0;
+            this->down_proj.at(1, 0) = 0.0;
+            this->down_proj.at(0, 1) = 0.0;
+            this->down_proj.at(1, 1) = 1.0;
+        }
+        // else if theta = pi
+        else
+        {
+            // ----------- compute up projector
+            this->up_proj.at(0, 0) = 0.0;
+            this->up_proj.at(1, 0) = 0.0;
+            this->up_proj.at(0, 1) = 0.0;
+            this->up_proj.at(1, 1) = 1.0;
+
+            // ----------- compute down projector
+            this->down_proj.at(0, 0) = 1.0;
+            this->down_proj.at(1, 0) = 0.0;
+            this->down_proj.at(0, 1) = 0.0;
+            this->down_proj.at(1, 1) = 0.0;
+        }
+    }
 }
