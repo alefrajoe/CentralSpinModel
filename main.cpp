@@ -18,12 +18,30 @@ int main(int argc, char **argv)
     model.AddHamiltonian();
     model.GroundStateAndEigenvals(model.state, true);
 
+    #ifdef MEASUREMENT_PROTOCOL
+    while(model.time <= model.tmax)
+    {
+        // compute and write observables
+        model.ComputeObservables();
+        model.WriteObservables();
+        // measurement protocol
+        model.ComputeMeasurementDirection();
+        model.ComputeProjectorsAlongDirection();
+        model.ProjectStateWithMeasurement();
+        // evolve in time
+        // ! StateNormalization is inside the time evolution function
+        model.RungeKuttaStep();
+    }
+    #endif
+
+    #ifdef KZ_PROTOCOL
     // ************   Kibble - Zurek  **************************
     for(int i=0; i<N_CYCLES; i++) model.TimeEvolutionProtocol();
     // compute observables also at the end of the simulation
     model.ComputeObservables();
     // write to file also at the end of the simulation
     model.WriteObservables();
+    #endif
 
     // return exit success
     return 0;

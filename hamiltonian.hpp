@@ -16,6 +16,11 @@ class Model
     double time;
     double t_KZ;
     double final_param;
+    double p;
+    double tm;
+    double tmax;
+    int step;
+    int every_step_try_measurement;
     int interaction_spin;
     int interaction_chain;
 
@@ -27,8 +32,8 @@ class Model
     double nx;
     double ny;
     double nz;
-    arma::cx_dmat up_proj;
-    arma::cx_dmat down_proj;
+    arma::sp_cx_dmat up_proj;
+    arma::sp_cx_dmat down_proj;
 
     // operators related to the magnetization of the central spin 
     arma::sp_cx_dmat *magx;
@@ -62,6 +67,8 @@ class Model
 
     // diagonalization
     void GroundStateAndEigenvals(arma::cx_vec *vec, bool replace_eigvals);
+    // state normalization
+    void StateNormalization();
 
     // random numbers
     double RandomUniformDouble();
@@ -80,6 +87,7 @@ class Model
     // measurement induced dynamics
     void ComputeMeasurementDirection();
     void ComputeProjectorsAlongDirection();
+    void ProjectStateWithMeasurement();
 };
 
 #endif

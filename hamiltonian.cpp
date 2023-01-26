@@ -24,6 +24,11 @@ Model::Model(int argc, char **argv)
     this->t_KZ = 0.0;
     this->final_param = 0.0;
     this->seed = 0;
+    this->p = 0.0;
+    this->tm = 0.0;
+    this->tmax = 0.0;
+    this->step = 0;
+    this->every_step_try_measurement = 0;
 
     // for all arguments passed
     for(int i=0; i<argc; i++)
@@ -46,9 +51,15 @@ Model::Model(int argc, char **argv)
             else if (temp.compare("tkz") == 0) this->t_KZ = atof(argv[i+1]);
             else if (temp.compare("end") == 0) this->final_param = atof(argv[i+1]);
             else if (temp.compare("seed") == 0) this->seed = atoi(argv[i+1]);
+            else if (temp.compare("p") == 0) this->p = atof(argv[i+1]);
+            else if (temp.compare("tm") == 0) this->tm = atof(argv[i+1]);
+            else if (temp.compare("tmax") == 0) this->tmax = atof(argv[i+1]);
+            else if (temp.compare("steptm") == 0) this->every_step_try_measurement = atoi(argv[i+1]);
             else {std::cout << "This parameter is not allowed!" << std::endl; exit(1);}
         }
     }
+    // if steptm is passed then compute this->deltat from "this->tm" and "this->every_step_try_measurement"
+    this->deltat = this->tm / this->every_step_try_measurement;
 
     // random number initialization
     // Use random_device to generate a seed for Mersenne twister engine.
@@ -66,8 +77,8 @@ Model::Model(int argc, char **argv)
     this->ny = 0.0;
     this->nz = 1.0;
     // set up and down spin projectors to zero
-    this->up_proj.zeros(2, 2);
-    this->down_proj.zeros(2, 2);
+    this->up_proj = this->up_proj.zeros(2, 2);
+    this->down_proj = this->down_proj.zeros(2, 2);
 
 
     // initialize all parameters required for the simulation
@@ -476,6 +487,21 @@ void Model::GroundStateAndEigenvals(arma::cx_vec *vec, bool replace_eigavals)
 }
 
 /**
+ * Normalize this->state so that it has unit length.
+ * ------------------------------------
+ * parameters:
+ *              - None
+ * return:
+ *              - None
+*/
+void Model::StateNormalization()
+{
+    // self explanatory
+    double norma{norm(*this->state)};
+    (*this->state) = (*this->state) / norma;
+}
+
+/**
  * Return a random double in [0, 1] distributed according to a uniform distribution.
  * ------------------------------------
  * parameters:
@@ -647,8 +673,13 @@ void Model::RungeKuttaStep()
 
     // compute new state at time t + this->deltat
     (*this->state) = (*this->state) + (this->deltat/6.0) * (k1 + (2.0 * k2) + (2.0 * k3) + k4);
+    // normalize the state after Runge-Kutta step
+    this->StateNormalization();
+
     // add deltat to time
+    // add one step
     this->time += this->deltat;
+    this->step += 1;
 }
 
 /**
@@ -827,19 +858,20 @@ void Model::ComputeProjectorsAlongDirection()
     {
         // find phi
         double phi{atan(this->ny/this->nx)};
-        // add pi if nx is negative
-        if(this->nx < 0) phi = phi + acos(-1.0);
+        // add pi if nx is negative and add 2.0 PI if it is negative
+        if(this->nx < 0) phi = phi + PI;
+        if(phi < 0) phi = phi + (2.0 * PI);
 
         // ----------- compute up projector
         this->up_proj.at(0, 0) = pow(cos(theta/2.0), 2);
-        this->up_proj.at(1, 0) = - sin(theta/2.0) * cos(theta/2.0) * exp(I * phi);
-        this->up_proj.at(0, 1) = - sin(theta/2.0) * cos(theta/2.0) * exp(- I * phi);
+        this->up_proj.at(1, 0) = sin(theta/2.0) * cos(theta/2.0) * exp(I * phi);
+        this->up_proj.at(0, 1) = sin(theta/2.0) * cos(theta/2.0) * exp(- I * phi);
         this->up_proj.at(1, 1) = pow(sin(theta/2.0), 2);
 
         // ----------- compute down projector
         this->down_proj.at(0, 0) = pow(sin(theta/2.0), 2);
-        this->down_proj.at(1, 0) = - sin(theta/2.0) * cos(theta/2.0) * exp(- I * phi);
-        this->down_proj.at(0, 1) = - sin(theta/2.0) * cos(theta/2.0) * exp(+ I * phi);
+        this->down_proj.at(1, 0) = - sin(theta/2.0) * cos(theta/2.0) * exp(I * phi);
+        this->down_proj.at(0, 1) = - sin(theta/2.0) * cos(theta/2.0) * exp(-I * phi);
         this->down_proj.at(1, 1) = pow(cos(theta/2.0), 2);
     }
     // if theta is along the z axis 
@@ -876,4 +908,46 @@ void Model::ComputeProjectorsAlongDirection()
             this->down_proj.at(1, 1) = 0.0;
         }
     }
+}
+
+/**
+ * Project the current state with a measurement.
+ * The state is projected from |psi> ---> \sum_i M_i|psi>/(prob M_i), where
+ * M_i are the possible outcomes of the measurements, i.e., the two feasible magnetizations of the central spin.
+ * Prob M_i is the probability of observing the spin with magnetization M_i.
+*/
+void Model::ProjectStateWithMeasurement()
+{
+    // define 2^L X 2^L identity
+    arma::sp_cx_dmat id(pow(2, this->L), pow(2, this->L));
+    id.eye(pow(2, this->L), pow(2, this->L));
+    
+    // ----------------- Up projection -----------------------
+    // define first projector (up direction)
+    arma::sp_cx_dmat projector = arma::kron(this->up_proj, id);
+    // compute probability up state
+    double prob_up = this->ExpectationValueOfOperatorOnState(&projector, this->state);
+    // initialize up projection operator
+    arma::cx_vec up_vec(pow(2, this->L+1));
+    // if prob > EPSILON \sim 10^-15 (this check is done to avoid severe numerical errors)
+    if(prob_up > EPSILON) up_vec = pow(prob_up, -0.5) * projector * (*this->state);
+    else up_vec = up_vec.zeros(pow(2, this->L+1));
+
+    // ----------------- Down projection -----------------------
+    // define first projector (down direction)
+    projector = arma::kron(this->down_proj, id);
+    // compute probability up state
+    double prob_down = this->ExpectationValueOfOperatorOnState(&projector, this->state);
+    // initialize up projection operator
+    arma::cx_vec down_vec(pow(2, this->L+1));
+    // if prob > EPSILON \sim 10^-15 (this check is done to avoid severe numerical errors)
+    if(prob_down > EPSILON) down_vec = pow(prob_down, -0.5) * projector * (*this->state);
+    else down_vec = down_vec.zeros(pow(2, this->L+1));
+
+    std::cout << "prob up is " << prob_up << std::endl;
+    std::cout << "prob down is " << prob_down << std::endl;
+    std::cout << "prob total is " << prob_up + prob_down << std::endl;
+
+    // compute final state
+    (*this->state) = pow(2.0, -0.5) * (up_vec + down_vec);
 }
