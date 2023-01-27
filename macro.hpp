@@ -18,6 +18,18 @@
 //#define APBC
 
 /**
+ * These are the scaling exponent used if SCALING_VARIABLES is (true).
+ * Indeed, if SCALING_VARIABLES (true) all variables passed to the program will be scaled such that g'_i*L^{EXPONENT_g_i} is constant.
+ * {g_i} -> {g'_i}={g_i_c + g_i/L^{EXPONENT_g_i}}
+*/
+#define SCALING_VARIABLES (true)
+#define EXPONENT_G (1.0)
+#define EXPONENT_LAMBDA (1.0)
+#define EXPONENT_KAPPA (15.0/8.0)
+#define EXPONENT_H (15.0/8.0)
+#define EXPONENT_P (2.0)
+
+/**
  * If ROUND_TRIP is defined, stop the KZ protocol when the parameters are all the same as the starting ones.
  * From here we can choose between different schemes for time evolution.
  * -  KZ_PROTOCOL : KZ of one parameter of the hamiltonian
@@ -28,7 +40,7 @@
 //#define KZ_PROTOCOL
 #define ROUND_TRIP
 #define N_CYCLES (1000)
-
+// this variable should always be equal to (false) or (true)
 #define MEASUREMENT_PROTOCOL (false)
 
 /**
@@ -43,13 +55,15 @@
  * Measurement dyanmics protocol used
 */
 //#define MEASURE_SIGMAX
-//#define MEASURE_SIGMAZ
-#define MEASURE_RANDOM
+#define MEASURE_SIGMAZ
+//#define MEASURE_RANDOM
 
 
 /**
  * Observables taken into account.
+ * The variable WRITE_OUTPUT_EVERY_N_STEP variable is an integer defining how often the output data will be written. 
  */
+#define WRITE_OUTPUT_EVERY_N_STEP (10)
 #define OBS_MAG
 //#define OBS_ADIABATICITY
 

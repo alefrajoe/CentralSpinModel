@@ -19,14 +19,24 @@ int main(int argc, char **argv)
     model.GroundStateAndEigenvals(model.state, true);
 
     #ifdef MEASUREMENT_PROTOCOL
+    // to avoid severe discontinuities at t=0 and trigger the dynamics we always project the state at t=0
+    model.ComputeMeasurementDirection();
+    model.ComputeProjectorsAlongDirection();
+    model.ProjectStateWithMeasurement();
+
     while(model.time <= model.tmax)
     {    
-        // compute and write observables
-        model.ComputeObservables();
-        model.WriteObservables();
+        // compute and write observables with a frequncy WRITE_OUTPUT_EVERY_N_STEP
+        // if WRITE_OUTPUT_EVERY_N_STEP == 1 we write the observables to output after each model.deltat
+        if(model.step % WRITE_OUTPUT_EVERY_N_STEP == 0)
+        {
+            model.ComputeObservables();
+            model.WriteObservables();
+        }
 
         // if the measurement should be done, i.e.,
-        // it is not the first step and step % every_step_try_measurement == 0
+        // step != 0 and step % every_step_try_measurement == 0
+        // note that if step == 0 and MEASUREMENT_PROTOCOL is defined model.state has already been projected 
         if(model.step != 0 && model.step % model.every_step_try_measurement == 0)
         if(model.RandomUniformDouble() <= model.p)
         {

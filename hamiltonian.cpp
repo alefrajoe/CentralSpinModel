@@ -61,6 +61,17 @@ Model::Model(int argc, char **argv)
     #ifdef MEASUREMENT_PROTOCOL
     this->deltat = this->tm / double(this->every_step_try_measurement);
     #endif
+    // if SCALING_VARIABLE is defined, rescale all variables
+    if(SCALING_VARIABLES)
+    {
+        this->g = 1.0 + this->g / pow(this->L, EXPONENT_G);
+        this->lambda = this->lambda / pow(this->L, EXPONENT_LAMBDA);
+        this->kappa = this->kappa / pow(this->L, EXPONENT_KAPPA);
+        this->h = this->h / pow(this->L, EXPONENT_H);
+        #ifdef MEASUREMENT_PROTOCOL
+        this->p = this->p / pow(this->L, EXPONENT_P);
+        #endif
+    }
 
     // random number initialization
     // Use random_device to generate a seed for Mersenne twister engine.
@@ -169,7 +180,7 @@ Model::Model(int argc, char **argv)
     std::ofstream outfile;
     // open file
     outfile.open(this->filename, std::ios_base::app); 
-    outfile << "#L   g   lambda  kappa  h   time    ";
+    outfile << "#step   L   g   lambda  kappa  h   time    ";
     #ifdef KZ_PROTOCOL
     outfile << "t_KZ    ";
     #endif
@@ -616,7 +627,7 @@ void Model::WriteObservables()
     outfile.open(this->filename, std::ios_base::app); 
 
     // write all observables to file
-    outfile << this->L << "\t" << std::setprecision(8) <<  this->g << "\t" << std::setprecision(8) <<  this->lambda << "\t" << std::setprecision(8) <<  this->kappa << "\t" << std::setprecision(8) <<  this->h << "\t" << std::setprecision(8) <<  this->time << "\t";
+    outfile << this->step << "\t" << this->L << "\t" << std::setprecision(8) <<  this->g << "\t" << std::setprecision(8) <<  this->lambda << "\t" << std::setprecision(8) <<  this->kappa << "\t" << std::setprecision(8) <<  this->h << "\t" << std::setprecision(8) <<  this->time << "\t";
     #ifdef KZ_PROTOCOL
     outfile << std::setprecision(8) <<  this->t_KZ << "\t";
     #endif
