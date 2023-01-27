@@ -101,8 +101,8 @@ Model::Model(int argc, char **argv)
     arma::sp_cx_dmat sigmax(2, 2), sigmay(2, 2), sigmaz(2, 2), id(pow(2, this->L), pow(2, this->L));
     sigmax(0, 1) = 1.0;     // sigmax
     sigmax(1, 0) = 1.0;
-    sigmay(0, 1) = -1.0j;       // sigmay
-    sigmay(1, 0) = 1.0j;
+    sigmay(0, 1) = -1.0 * I;       // sigmay
+    sigmay(1, 0) = 1.0 * I;
     sigmaz(0, 0) = 1.0;         // sigmaz
     sigmaz(1, 1) = -1.0;
 
@@ -155,14 +155,28 @@ Model::Model(int argc, char **argv)
         exit(1);
     }
     // create filename
-    this->filename = "data_centralspin/data" + inter_string + std::to_string(this->g) + "g" + std::to_string(this->lambda) + "lambda" + std::to_string(this->kappa) + "kappa" + std::to_string(this->L) + "L" + std::to_string(this->t_KZ) + "tKZ" + std::to_string(this->deltat) + "dt" + ".txt";
+    this->filename = "data_centralspin/data" + inter_string + std::to_string(this->g) + "g" + std::to_string(this->lambda) + "lambda" + std::to_string(this->kappa) + "kappa" + std::to_string(this->h) + "h"  + std::to_string(this->L) + "L";
+    #ifdef KZ_PROTOCOL
+    this->filename += std::to_string(this->t_KZ) + "tKZ" + std::to_string(this->deltat) + "dt";
+    #endif
+    #ifdef MEASUREMENT_PROTOCOL
+    this->filename += std::to_string(this->p) + "p" + std::to_string(this->deltat) + "dt" + std::to_string(this->seed) + "seed";
+    #endif
+    this->filename += ".txt";
 
     // open file inside directory and write first line
     // create ofstream variable
     std::ofstream outfile;
     // open file
     outfile.open(this->filename, std::ios_base::app); 
-    outfile << "#L   g   lambda  kappa  time  t_KZ   magx    magy    magz";
+    outfile << "#L   g   lambda  kappa  h   time    ";
+    #ifdef KZ_PROTOCOL
+    outfile << "t_KZ    ";
+    #endif
+    #ifdef MEASUREMENT_PROTOCOL
+    outfile << "p   tm  ";
+    #endif
+    outfile << "magx    magy    magz";
     #ifdef OBS_ADIABATICITY
     outfile << "    magGSx  magGSy  magGSz  adiabaticity";
     #endif
@@ -602,7 +616,13 @@ void Model::WriteObservables()
     outfile.open(this->filename, std::ios_base::app); 
 
     // write all observables to file
-    outfile << this->L << "\t" << std::setprecision(8) <<  this->g << "\t" << std::setprecision(8) <<  this->lambda << "\t" << std::setprecision(8) <<  this->kappa << "\t" << std::setprecision(8) <<  this->time << "\t" << std::setprecision(8) <<  this->t_KZ << "\t";
+    outfile << this->L << "\t" << std::setprecision(8) <<  this->g << "\t" << std::setprecision(8) <<  this->lambda << "\t" << std::setprecision(8) <<  this->kappa << "\t" << std::setprecision(8) <<  this->h << "\t" << std::setprecision(8) <<  this->time << "\t";
+    #ifdef KZ_PROTOCOL
+    outfile << std::setprecision(8) <<  this->t_KZ << "\t";
+    #endif
+    #ifdef MEASUREMENT_PROTOCOL
+    outfile << std::setprecision(8) <<  this->p << "\t" << std::setprecision(8) <<  this->p << "\t";
+    #endif
     #ifdef OBS_MAG
     for(int i=0; i<3; i++) outfile << std::setprecision(16) << this->magObs[i] << "\t";
     #endif
@@ -947,6 +967,15 @@ void Model::ProjectStateWithMeasurement()
     if(prob_down > EPSILON) down_vec = pow(prob_down, -0.5) * projector * (*this->state);
     else down_vec = down_vec.zeros(pow(2, this->L+1));
 
-    // compute final state
+    // if MEASUREMENT_PROTOCOL is true we project on the up or down state with probability prob_up and prob_down 
+    if(MEASUREMENT_PROTOCOL)
+    {
+        // projection along the up direction
+        if(this->RandomUniformDouble() <= prob_up) (*this->state) = up_vec;
+        // else down direction
+        else (*this->state) = down_vec;
+    }
+    // if MEASUREMENT_PROTOCOL is false we project on both the up and down direction
+    else
     (*this->state) = pow(2.0, -0.5) * (up_vec + down_vec);
 }

@@ -22,12 +22,14 @@
  * From here we can choose between different schemes for time evolution.
  * -  KZ_PROTOCOL : KZ of one parameter of the hamiltonian
  * - MEASUREMENT_PROTOCOL : The dynamic is triggered by monitoring continuously the central spin system.
+ *                          if MEASUREMENT_PROTOCOL (true), we project the spin either on the up or down direction.
+ *                          if MEASUREMENT_PROTOCOL (false), the spin is measured along the axis without projecting specifically on the up or down component
 */
 //#define KZ_PROTOCOL
 #define ROUND_TRIP
 #define N_CYCLES (1000)
 
-#define MEASUREMENT_PROTOCOL
+#define MEASUREMENT_PROTOCOL (false)
 
 /**
  * Kibble-Zurek parameter:
@@ -41,8 +43,8 @@
  * Measurement dyanmics protocol used
 */
 //#define MEASURE_SIGMAX
-#define MEASURE_SIGMAZ
-//#define MEASURE_RANDOM
+//#define MEASURE_SIGMAZ
+#define MEASURE_RANDOM
 
 
 /**
