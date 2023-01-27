@@ -58,8 +58,9 @@ Model::Model(int argc, char **argv)
             else {std::cout << "This parameter is not allowed!" << std::endl; exit(1);}
         }
     }
-    // if steptm is passed then compute this->deltat from "this->tm" and "this->every_step_try_measurement"
-    this->deltat = this->tm / this->every_step_try_measurement;
+    #ifdef MEASUREMENT_PROTOCOL
+    this->deltat = this->tm / double(this->every_step_try_measurement);
+    #endif
 
     // random number initialization
     // Use random_device to generate a seed for Mersenne twister engine.
@@ -626,6 +627,7 @@ void Model::WriteObservables()
 */
 void Model::EvolveHamiltonianByDx(double dx)
 {
+    #ifdef KZ_PROTOCOL
     // dependently on the macro, compute H(x + dx)
     // it is assumed that the parameter changed will be changed such that
     // C = C + dx / t_KZ, where t_KZ is stored into the model
@@ -642,6 +644,7 @@ void Model::EvolveHamiltonianByDx(double dx)
     #ifdef KZ_KAPPA
     this->AddInteractionCentralSpinAndChain(this->interaction_spin, this->interaction_chain, dx/this->t_KZ);
     this->kappa += dx/this->t_KZ;
+    #endif
     #endif
 }
 
@@ -660,15 +663,15 @@ void Model::RungeKuttaStep()
     k0 = (*this->state);
 
     // compute k1
-    k1 = -1.0j * (*this->hamiltonian) * (k0);
+    k1 = -1.0 * I * (*this->hamiltonian) * (k0);
     // compute k2
     this->EvolveHamiltonianByDx(this->deltat/2.0);
-    k2 = -1.0j * (*this->hamiltonian) * (k0 + (this->deltat/2.0) * k1);
+    k2 = -1.0 * I * (*this->hamiltonian) * (k0 + (this->deltat/2.0) * k1);
     // compute k3
-    k3 = -1.0j * (*this->hamiltonian) * (k0 + (this->deltat/2.0) * k2);
+    k3 = -1.0 * I * (*this->hamiltonian) * (k0 + (this->deltat/2.0) * k2);
     // compute k4
     this->EvolveHamiltonianByDx(this->deltat/2.0);
-    k4 = -1.0j * (*this->hamiltonian) * (k0 + (this->deltat) * k3);
+    k4 = -1.0 * I * (*this->hamiltonian) * (k0 + (this->deltat) * k3);
 
 
     // compute new state at time t + this->deltat
@@ -943,10 +946,6 @@ void Model::ProjectStateWithMeasurement()
     // if prob > EPSILON \sim 10^-15 (this check is done to avoid severe numerical errors)
     if(prob_down > EPSILON) down_vec = pow(prob_down, -0.5) * projector * (*this->state);
     else down_vec = down_vec.zeros(pow(2, this->L+1));
-
-    std::cout << "prob up is " << prob_up << std::endl;
-    std::cout << "prob down is " << prob_down << std::endl;
-    std::cout << "prob total is " << prob_up + prob_down << std::endl;
 
     // compute final state
     (*this->state) = pow(2.0, -0.5) * (up_vec + down_vec);

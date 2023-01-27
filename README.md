@@ -6,10 +6,17 @@ $$\hat{H}=-J\sum_{i=1}^L\hat{\sigma}^{(1)}_i\hat{\sigma}^{(1)}_{i+1}-g\sum_{i=1}
 
 where Periodic Boundary Conditions (PBC) are intended in the above expression, and $a, b=1,2,3$ are two directions chosen at running time. We set $J=1$, so that all quantities are measured in units of $J$.
 
-## Kibble-Zurek protocol
-
 To compile the code
+
 > g++ -O3 *.cpp -o central -lm -larmadillo -lstdc++fs
+
+## Measurement induced dynamic
+
+The dynamic of the whole system is driven by the interplay between the continuous monitoring of the central qubit and $\hat{H}$.
+We measure the central spin every $t_M$ with probability $p$ along the direction $\vec{n}$. 
+
+
+## Kibble-Zurek protocol
 
 The parameters to be passed to the program are
 - **L** (**L**): int - length of the Ising chain

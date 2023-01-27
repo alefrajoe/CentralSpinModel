@@ -41,15 +41,15 @@
  * Measurement dyanmics protocol used
 */
 //#define MEASURE_SIGMAX
-//#define MEASURE_SIGMAZ
-#define MEASURE_RANDOM
+#define MEASURE_SIGMAZ
+//#define MEASURE_RANDOM
 
 
 /**
  * Observables taken into account.
  */
 #define OBS_MAG
-#define OBS_ADIABATICITY
+//#define OBS_ADIABATICITY
 
 /**
  * Define useful macros

@@ -20,14 +20,22 @@ int main(int argc, char **argv)
 
     #ifdef MEASUREMENT_PROTOCOL
     while(model.time <= model.tmax)
-    {
+    {    
         // compute and write observables
         model.ComputeObservables();
         model.WriteObservables();
-        // measurement protocol
-        model.ComputeMeasurementDirection();
-        model.ComputeProjectorsAlongDirection();
-        model.ProjectStateWithMeasurement();
+
+        // if the measurement should be done, i.e.,
+        // it is not the first step and step % every_step_try_measurement == 0
+        if(model.step != 0 && model.step % model.every_step_try_measurement == 0)
+        if(model.RandomUniformDouble() <= model.p)
+        {
+            // measurement protocol
+            model.ComputeMeasurementDirection();
+            model.ComputeProjectorsAlongDirection();
+            model.ProjectStateWithMeasurement();
+        }
+
         // evolve in time
         // ! StateNormalization is inside the time evolution function
         model.RungeKuttaStep();
