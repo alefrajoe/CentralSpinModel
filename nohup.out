@@ -1,6 +1,0 @@
-
-warning: eigs_sym(): decomposition failed
-
-error: Mat::col(): index out of bounds
-terminate called after throwing an instance of 'std::logic_error'
-  what():  Mat::col(): index out of bounds
