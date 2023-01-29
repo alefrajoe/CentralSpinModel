@@ -32,6 +32,7 @@ class Model
     double nx;
     double ny;
     double nz;
+    arma::sp_cx_dmat id22;
     arma::sp_cx_dmat up_proj;
     arma::sp_cx_dmat down_proj;
 
@@ -87,7 +88,14 @@ class Model
     // measurement induced dynamics
     void ComputeMeasurementDirection();
     void ComputeProjectorsAlongDirection();
-    void ProjectStateWithMeasurement();
+    void ProjectStateWithMeasurementOnCentralSpin();
+
+    // projectors along the chain
+    int proj_chain_count;
+    std::vector<arma::sp_cx_dmat> *proj_chain;
+    void InitializeProjChain();
+    void SingleStepConstructIterativeProjectorsChain();
+    void ProjectStateWithMeasurementsOnChain();
 };
 
 #endif

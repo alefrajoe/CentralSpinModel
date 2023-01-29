@@ -33,15 +33,20 @@
  * If ROUND_TRIP is defined, stop the KZ protocol when the parameters are all the same as the starting ones.
  * From here we can choose between different schemes for time evolution.
  * -  KZ_PROTOCOL : KZ of one parameter of the hamiltonian
- * - MEASUREMENT_PROTOCOL : The dynamic is triggered by monitoring continuously the central spin system.
- *                          if MEASUREMENT_PROTOCOL (true), we project the spin either on the up or down direction.
- *                          if MEASUREMENT_PROTOCOL (false), the spin is measured along the axis without projecting specifically on the up or down component
+ * - MEASUREMENT_CENTRAL_SPIN_PROTOCOL : The dynamic is triggered by monitoring continuously the central spin system.
+ *                          if MEASUREMENT_CENTRAL_SPIN_PROTOCOL (true), we project the spin either on the up or down direction.
+ *                          if MEASUREMENT_CENTRAL_SPIN_PROTOCOL (false), the spin is measured along the axis without projecting specifically on the up or down component
 */
 //#define KZ_PROTOCOL
 #define ROUND_TRIP
 #define N_CYCLES (1000)
-// this variable should always be equal to (false) or (true)
-#define MEASUREMENT_PROTOCOL (false)
+#define MEASUREMENT_PROTOCOL
+// just one of these variables should be set to (true)
+//****************************************************************************
+// active if defind and set to (true)
+//#define MEASUREMENT_CENTRAL_SPIN_PROTOCOL (true)
+// active if defined and set to true (true)
+#define MEASUREMENT_CHAIN_PROTOCOL (true)
 
 /**
  * Kibble-Zurek parameter:
@@ -54,8 +59,8 @@
 /**
  * Measurement dyanmics protocol used
 */
-//#define MEASURE_SIGMAX
-#define MEASURE_SIGMAZ
+#define MEASURE_SIGMAX
+//#define MEASURE_SIGMAZ
 //#define MEASURE_RANDOM
 
 

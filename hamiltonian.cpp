@@ -89,6 +89,7 @@ Model::Model(int argc, char **argv)
     this->ny = 0.0;
     this->nz = 1.0;
     // set up and down spin projectors to zero
+    this->id22 = this->id22.eye(2, 2);
     this->up_proj = this->up_proj.zeros(2, 2);
     this->down_proj = this->down_proj.zeros(2, 2);
 
@@ -128,6 +129,14 @@ Model::Model(int argc, char **argv)
     // initialize observables
     for(int i=0; i<3; i++) {this->magObs[i] = 0.0; this->maggroundObs[i] = 0.0;}
     this->adiabaticity = 0.0;
+
+    // initialize projectors on the chain
+    // count the number of projectors for the chain, initialized to 1 -> identity
+    this->proj_chain_count = 1;
+    // initialize the projector
+    this->proj_chain = new std::vector<arma::sp_cx_dmat>;
+    arma::sp_cx_dmat id2(2, 2); id2.eye(2, 2);
+    this->proj_chain->push_back(id2);
 
     // create the directory where data will be saved (if it doesn't exist)
     std::string directory{"data_centralspin"};
@@ -170,7 +179,7 @@ Model::Model(int argc, char **argv)
     #ifdef KZ_PROTOCOL
     this->filename += std::to_string(this->t_KZ) + "tKZ" + std::to_string(this->deltat) + "dt";
     #endif
-    #ifdef MEASUREMENT_PROTOCOL
+    #ifdef MEASUREMENT_CENTRAL_SPIN_PROTOCOL
     this->filename += std::to_string(this->p) + "p" + std::to_string(this->deltat) + "dt" + std::to_string(this->seed) + "seed";
     #endif
     this->filename += ".txt";
@@ -222,6 +231,8 @@ void Model::AddSpinHamiltonian(double par)
  * ------------------------------------
  * parameters:
  *              - double : par  - the hamiltonian term is multiplied by par
+ * return:
+ *              - None
 */
 void Model::AddTransverseFieldChain(double par)
 {
@@ -627,12 +638,12 @@ void Model::WriteObservables()
     outfile.open(this->filename, std::ios_base::app); 
 
     // write all observables to file
-    outfile << this->step << "\t" << this->L << "\t" << std::setprecision(8) <<  this->g << "\t" << std::setprecision(8) <<  this->lambda << "\t" << std::setprecision(8) <<  this->kappa << "\t" << std::setprecision(8) <<  this->h << "\t" << std::setprecision(8) <<  this->time << "\t";
+    outfile << this->step << "\t" << this->L << "\t" << std::setprecision(12) <<  this->g << "\t" << std::setprecision(12) <<  this->lambda << "\t" << std::setprecision(12) <<  this->kappa << "\t" << std::setprecision(12) <<  this->h << "\t" << std::setprecision(12) <<  this->time << "\t";
     #ifdef KZ_PROTOCOL
-    outfile << std::setprecision(8) <<  this->t_KZ << "\t";
+    outfile << std::setprecision(12) <<  this->t_KZ << "\t";
     #endif
     #ifdef MEASUREMENT_PROTOCOL
-    outfile << std::setprecision(8) <<  this->p << "\t" << std::setprecision(8) <<  this->p << "\t";
+    outfile << std::setprecision(12) <<  this->p << "\t" << std::setprecision(8) <<  this->tm << "\t";
     #endif
     #ifdef OBS_MAG
     for(int i=0; i<3; i++) outfile << std::setprecision(16) << this->magObs[i] << "\t";
@@ -949,8 +960,13 @@ void Model::ComputeProjectorsAlongDirection()
  * The state is projected from |psi> ---> \sum_i M_i|psi>/(prob M_i), where
  * M_i are the possible outcomes of the measurements, i.e., the two feasible magnetizations of the central spin.
  * Prob M_i is the probability of observing the spin with magnetization M_i.
+ * ------------------------------------
+ * parameters:
+ *              - None
+ * return:
+ *              - None
 */
-void Model::ProjectStateWithMeasurement()
+void Model::ProjectStateWithMeasurementOnCentralSpin()
 {
     // define 2^L X 2^L identity
     arma::sp_cx_dmat id(pow(2, this->L), pow(2, this->L));
@@ -978,15 +994,119 @@ void Model::ProjectStateWithMeasurement()
     if(prob_down > EPSILON) down_vec = pow(prob_down, -0.5) * projector * (*this->state);
     else down_vec = down_vec.zeros(pow(2, this->L+1));
 
-    // if MEASUREMENT_PROTOCOL is true we project on the up or down state with probability prob_up and prob_down 
-    if(MEASUREMENT_PROTOCOL)
+    // if MEASUREMENT_CENTRAL_SPIN_PROTOCOL is true we project on the up or down state with probability prob_up and prob_down 
+    #ifdef MEASUREMENT_CENTRAL_SPIN_PROTOCOL
+    if(MEASUREMENT_CENTRAL_SPIN_PROTOCOL)
     {
         // projection along the up direction
         if(this->RandomUniformDouble() <= prob_up) (*this->state) = up_vec;
         // else down direction
         else (*this->state) = down_vec;
     }
-    // if MEASUREMENT_PROTOCOL is false we project on both the up and down direction
     else
-    (*this->state) = pow(2.0, -0.5) * (up_vec + down_vec);
+    {
+        // else there is an error, exit 1
+        std::cout << "MEASUREMENT_CENTRAL_SPIN_PROTOCOL is not true!" << std::endl;
+        exit(2);
+    }
+    #endif
+}
+
+/**
+ * Initialize the projectors along the chain.
+ * this->proj_chain_count is set to 1.
+ * this->proj_chain is set to the identity 2 X 2.
+ * ------------------------------------
+ * parameters:
+ *              - None
+ * return:
+ *              - None
+ * 
+*/
+void Model::InitializeProjChain()
+{
+    this->proj_chain_count = 1;
+    // clear vector and set to identity
+    this->proj_chain->clear();
+    this->proj_chain->push_back(this->id22);
+}
+
+/**
+ * This function is used to construct iteratively all the projectors for the monitored quantum spin chain.
+ * With probability p:
+ *                  - The current number of proj_chain are first doubled
+ *                  - The first half of these vecotrs is multiplied by the "up" projector along n
+ *                  - The second half of these vecotrs is multiplied by the "down" projector along n
+ * With probability 1 - p:
+ *                  All the existing proj_chain are multiplied by a 2 X 2 identity.
+ * ------------------------------------
+ * parameters:
+ *              - None
+ * return:
+ *              - None
+*/
+void Model::SingleStepConstructIterativeProjectorsChain()
+{
+    // with prob p
+    if(this->RandomUniformDouble() <= this->p)
+    {
+        // for all existing projectors
+        for(int i=0; i<this->proj_chain_count; i++)
+        {
+            this->proj_chain->push_back(arma::kron(this->proj_chain->at(i), this->down_proj));
+            this->proj_chain->at(i) = arma::kron(this->proj_chain->at(i), this->up_proj);
+        }
+
+        // the number of projectors for the chain are doubled
+        this->proj_chain_count *= 2; 
+    }
+    // with prob 1 - p
+    else
+    {
+        for(int i=0; i<this->proj_chain_count; i++) this->proj_chain->at(i) = arma::kron(this->proj_chain->at(i), this->id22);
+    }
+}
+
+/**
+ * We project the current state onto state -> M_k/sqrt(P_k) state, where M_k is a projector and sqrt(P_k) is its probability.
+ * ------------------------------------
+ * parameters:
+ *              - None
+ * return:
+ *              - None
+*/
+void Model::ProjectStateWithMeasurementsOnChain()
+{
+    // initialize the chain projector
+    this->InitializeProjChain();
+
+    // construct all projectors
+    // for all elements of the chain the spin can be projected with probability p
+    for(int i=0; i<this->L; i++) this->SingleStepConstructIterativeProjectorsChain();
+
+    // current temp_probability
+    double temp_prob = 0.0;
+    // extract a number
+    double prob_extracted = this->RandomUniformDouble();
+
+    // continue the process until temp_prob >= prob_extracted
+    for(int k=0; k<this->proj_chain_count; k++)
+    {
+        // compute probability of projecting onto state k
+        double p_k = this->ExpectationValueOfOperatorOnState(&(this->proj_chain->at(k)), this->state);
+        // sum p_k to temp_prob
+        temp_prob += p_k;
+        // if now temp_prob is larger than prob_extracted project the state and return
+        if(temp_prob >= prob_extracted)
+        {
+            // projection onto the state k
+            (*this->state) = (pow(p_k, -0.5)) * (this->proj_chain->at(k) * (*this->state));
+            // return the function
+            return; 
+        }
+    }
+
+    // if the function arrives here it means that \sum_k p_k != 1 -> thorw an error
+    std::cout << "Probabilities in projection of the chain do not sum up to 1!" << std::endl;
+    exit(2);
 }

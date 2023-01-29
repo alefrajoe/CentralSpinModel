@@ -11,9 +11,9 @@ from pathlib import Path
 ##########################################################
 #            Observables dictionary
 ##########################################################
-# Save whether the std_dev_mean should be computed for each observables
-dic_obs = {'L':False, 'g':False, 'lambda':False, 'kappa':False, 'h':False, 'time':False, 'p':False, 'tm':False, 'magx':True, 'magy':True, 'magz':True, 'deco':True}
-
+#########################
+# Observable that will be shown
+Y = 'deco'
 
 START_DIR = "C:/Users/Utente/Desktop/central_spin_model"
 os.chdir(START_DIR)
@@ -53,30 +53,28 @@ for file in FILES:
             # compute the std deviation of the mean (it has an additional N^{-0.5} with respect to \sigma)
             df_stddev_mean = df.groupby("step").std() / np.sqrt(df_len.iloc[0])
             # plot observables and averaged observables with band lines
-            plt.plot(df_mean["time"]/int(df["L"][0]), df_mean["magx"], label="L="+str(int(df["L"][0])))
-            plt.fill_between(df_mean["time"]/int(df["L"][0]), df_mean["magx"]-df_stddev_mean["magx"], df_mean["magx"]+df_stddev_mean["magx"])
+            plt.plot(df_mean["time"]/int(df["L"][0]), df_mean[Y], label="L="+str(int(df["L"][0])))
+            plt.fill_between(df_mean["time"]/int(df["L"][0]), df_mean[Y]-df_stddev_mean[Y], df_mean[Y]+df_stddev_mean[Y])
         
+            # additional columns
+            df_mean["measure"] = df_len
+            df_mean["err_magx"] = df_stddev_mean["magx"]
+            df_mean["err_magy"] = df_stddev_mean["magy"]
+            df_mean["err_magz"] = df_stddev_mean["magz"]
+            df_mean["err_deco"] = df_stddev_mean["deco"]
         
-            # save the analyzed file into the directory
-            with open(os.path.join(path, file), 'w') as g:
-                # first line
-                g.write("#\t")
-                # for all columns in df_mean
-                for col in df_mean.columns:
-                    # if dic_obs false
-                    if not dic_obs[col]:
-                        g.write(f"{col}\t")
-                    # if true
-                    elif dic_obs[col]:
-                        g.write(f"{col}\terr_{col}\t")
-                # for all columns in df_mean
-                for col in df_mean.columns:
-                    # if dic_obs false
-                    if not dic_obs[col]:
-                        g.write(f"{col}\t")
-                    # if true
-                    elif dic_obs[col]:
-                        g.write(f"{col}\terr_{col}\t")
+            # create the plot file if it does not exist
+            path_plot = Path(os.path.join(path, file))
+            if(not path_plot.exists()):
+                # save the analyzed file into the director
+                with open(os.path.join(path, file), 'w') as gfile:
+                    # first line
+                    gfile.write("#\t")
+                    # for all columns in df_mean
+                    for col in df_mean.columns:
+                        gfile.write(f"{col}\t")
+                    gfile.write("\n")
+                    np.savetxt(gfile, df_mean.values)
                 
 plt.legend()
 plt.show()
