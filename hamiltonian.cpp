@@ -202,7 +202,7 @@ Model::Model(int argc, char **argv)
     #endif
     outfile << std::endl;
     // close file
-    outfile.close();
+    outfile.close(); 
 }
 
 /**
