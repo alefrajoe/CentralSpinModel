@@ -109,7 +109,7 @@ $$D(t)=\frac{1}{2}(1-\langle\vec{\Sigma}\rangle^2)$$
 
 $$\frac{1}{L}\sum_{x=1}^L\langle \sigma^{(i)}_{x} \rangle, \ \text{for} \ i=1$$
 
-- **Longitudinal Ising chain (connected) susceptibility** :
+- **Longitudinal Ising chain (disconnected) susceptibility** :
 > \# suscChain
 
-$$\frac{1}{L}\sum_{x, y=1}^L\langle \sigma^{(i)}_{x}\sigma^{(i)}_{y} \rangle - \langle \sigma^{(i)}_{x}\rangle\langle \sigma^{(i)}_{y} \rangle, \ \text{for} \ i=1$$
+$$\frac{1}{L}\sum_{x, y=1}^L\langle \sigma^{(i)}_{x}\sigma^{(i)}_{y} \rangle, \ \text{for} \ i=1$$

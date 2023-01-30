@@ -753,7 +753,7 @@ void Model::ComputeObservables()
     for(int j=0; j<this->L; j++)
     {
         this->corrchainObs[COOR2(i, j, this->L)] = this->ExpectationValueOfOperatorOnState(&(this->corrchainop[COOR2(i, j, this->L)]), this->state);
-        this->avgsusc += (this->corrchainObs[COOR2(i, j, this->L)] - (this->magchainObs[i] * this->magchainObs[j])) / this->L;
+        this->avgsusc += this->corrchainObs[COOR2(i, j, this->L)] / this->L;
     }
     #endif
 }
