@@ -11,6 +11,9 @@
 #include <string>
 #include <random>
 
+// define coordinates for two-point functions
+#define COOR2(x, y, size) (((x) * (size)) + (y))
+
 /**
  * Define boundary conditions to be implemented.
  */
@@ -68,9 +71,11 @@
  * Observables taken into account.
  * The variable WRITE_OUTPUT_EVERY_N_STEP variable is an integer defining how often the output data will be written. 
  */
+#define CORRELATION_DIRECTION (1)
 #define WRITE_OUTPUT_EVERY_N_STEP (10)
 #define OBS_MAG
 //#define OBS_ADIABATICITY
+#define OBS_CORRELATION_CHAIN
 
 /**
  * Define useful macros

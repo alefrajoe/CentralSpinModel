@@ -93,6 +93,18 @@ Model::Model(int argc, char **argv)
     this->up_proj = this->up_proj.zeros(2, 2);
     this->down_proj = this->down_proj.zeros(2, 2);
 
+    // observables
+    for(int i=0; i<3; i++) this->magObs[i] = 0.0;
+    for(int i=0; i<3; i++) this->maggroundObs[i] = 0.0;
+    this->magchainObs = new double[this->L];
+    for(int i=0; i<this->L; i++) this->magchainObs[i] = 0.0;
+    this->corrchainObs = new double[this->L * this->L];
+    for(int i=0; i<this->L*this->L; i++) this->magchainObs[i] = 0.0;
+    // operators for observables
+    magchainop = new arma::sp_cx_dmat [this->L];
+    corrchainop = new arma::sp_cx_dmat [this->L * this->L];
+    AddMagnetizationOperatorsChain(CORRELATION_DIRECTION);
+    AddCorrelationOperatorsChain(CORRELATION_DIRECTION);
 
     // initialize all parameters required for the simulation
     this->time = 0.0;
@@ -179,7 +191,7 @@ Model::Model(int argc, char **argv)
     #ifdef KZ_PROTOCOL
     this->filename += std::to_string(this->t_KZ) + "tKZ" + std::to_string(this->deltat) + "dt";
     #endif
-    #ifdef MEASUREMENT_CENTRAL_SPIN_PROTOCOL
+    #ifdef MEASUREMENT_PROTOCOL
     this->filename += std::to_string(this->p) + "p" + std::to_string(this->deltat) + "dt" + std::to_string(this->seed) + "seed";
     #endif
     this->filename += ".txt";
@@ -199,6 +211,9 @@ Model::Model(int argc, char **argv)
     outfile << "magx    magy    magz";
     #ifdef OBS_ADIABATICITY
     outfile << "    magGSx  magGSy  magGSz  adiabaticity";
+    #endif
+    #ifdef OBS_CORRELATION_CHAIN
+    outfile << "    magChain  suscChain";
     #endif
     outfile << std::endl;
     // close file
@@ -539,6 +554,109 @@ void Model::StateNormalization()
 }
 
 /**
+ * Create the operators (save them into Model) to compute the magnetizations along a specific direction.
+ * ------------------------------------
+ * parameters:
+ *              - int direction : The direction along which the magnetization operators are computed
+ *                                 direction = 1, 2, 3 for the corresponding Pauli matrices.
+ * return:
+ *              - None
+*/
+void Model::AddMagnetizationOperatorsChain(int direction)
+{
+    // allocate memory for the sigma operator used.
+    arma::sp_cx_dmat sigma(2, 2);
+    switch (direction)
+    {
+    case 1:
+        sigma.at(0, 1) = 1.0;
+        sigma.at(1, 0) = 1.0;
+        break;
+    case 2:
+        sigma.at(0, 1) = -1.0 * I;
+        sigma.at(1, 0) = 1.0 * I;
+        break;
+    case 3:
+        sigma.at(0, 0) = 1.0;
+        sigma.at(1, 1) = -1.0;
+    default:
+        std::cout << "Direction passed to AddMagnetizationOperatorsChain does not exist!!!" << std::endl;
+        exit(2);
+    }
+
+    // create all L operators projecting the spin "i" along the "direction"
+    for(int i=0; i<this->L; i++)
+    {
+        // start always from a 2 X 2 identity -> central spin
+        arma::sp_cx_dmat temp(2, 2);
+        temp.eye(2, 2);
+
+        // cycle over L to create the operator projecting the spin "j" along the "direction"
+        for(int j=0; j<this->L; j++)
+        {
+            if(i == j) temp = arma::kron(temp, sigma);
+            else temp = arma::kron(temp, (this->id22));
+        }
+
+        // save the spin 
+        this->magchainop[i] = temp;
+    }
+}
+
+/**
+ * Compute the L^2 operators corresponding to the (non connected) correlations C_{i, j}.
+ * The direction passed is the one along which the correlations are computed.
+ * ------------------------------------
+ * parameters:
+ *              - int direction : The direction along which the correlation operators C_{i, j} are computed
+ *                                 The direction = 1, 2, 3 corresponds to the 3 Pauli matrices.
+ * return:
+ *              - None
+*/    
+void Model::AddCorrelationOperatorsChain(int direction)
+{
+    // allocate memory for the sigma operator used.
+    arma::sp_cx_dmat sigma(2, 2);
+    switch (direction)
+    {
+    case 1:
+        sigma.at(0, 1) = 1.0;
+        sigma.at(1, 0) = 1.0;
+        break;
+    case 2:
+        sigma.at(0, 1) = -1.0 * I;
+        sigma.at(1, 0) = 1.0 * I;
+        break;
+    case 3:
+        sigma.at(0, 0) = 1.0;
+        sigma.at(1, 1) = -1.0;
+    default:
+        std::cout << "Direction passed to AddMagnetizationOperatorsChain does not exist!!!" << std::endl;
+        exit(2);
+    }
+
+    // create all L operators projecting the spin "i" along the "direction"
+    for(int i=0; i<this->L; i++)
+    for(int j=0; j<this->L; j++)
+    {
+        // start always from a 2 X 2 identity -> central spin
+        arma::sp_cx_dmat temp(2, 2);
+        temp.eye(2, 2);
+
+        // cycle over L to create the operator projecting the spin "j" along the "direction"
+        for(int k=0; k<this->L; k++)
+        {
+            if(i == j) temp = arma::kron(temp, this->id22);
+            else if(i == k || j == k) temp = arma::kron(temp, sigma);
+            else temp = arma::kron(temp, this->id22);
+        }
+
+        // save the spin 
+        this->corrchainop[COOR2(i, j, this->L)] = temp;
+    }
+}
+
+/**
  * Return a random double in [0, 1] distributed according to a uniform distribution.
  * ------------------------------------
  * parameters:
@@ -618,6 +736,26 @@ void Model::ComputeObservables()
     #ifdef OBS_ADIABATICITY
     this->adiabaticity = this->ComputeAdiabaticity();
     #endif
+    #ifdef OBS_CORRELATION_CHAIN
+    // initialize observables
+    this->avgmag = 0.0;
+    this->avgsusc = 0.0;
+
+    // compute average magnetization along the chosen direction
+    for(int i=0; i<this->L; i++)
+    {
+        this->magchainObs[i] = this->ExpectationValueOfOperatorOnState(&(this->magchainop[i]), this->state);
+        this->avgmag += magchainObs[i]/this->L;
+    }
+    
+    // compute the average susceptibility along the chosen direction
+    for(int i=0; i<this->L; i++)
+    for(int j=0; j<this->L; j++)
+    {
+        this->corrchainObs[COOR2(i, j, this->L)] = this->ExpectationValueOfOperatorOnState(&(this->corrchainop[COOR2(i, j, this->L)]), this->state);
+        this->avgsusc += (this->corrchainObs[COOR2(i, j, this->L)] - (this->magchainObs[i] * this->magchainObs[j])) / this->L;
+    }
+    #endif
 }
 
 /**
@@ -651,6 +789,10 @@ void Model::WriteObservables()
     #ifdef OBS_ADIABATICITY
     for(int i=0; i<3; i++) outfile << std::setprecision(16) << this->maggroundObs[i] << "\t";
     outfile << std::setprecision(16) << this->adiabaticity << "\t";
+    #endif
+    #ifdef OBS_CORRELATION_CHAIN
+    outfile << std::setprecision(16) << this->avgmag << "\t";
+    outfile << std::setprecision(16) << this->avgsusc << "\t";
     #endif
     outfile << std::endl;
 

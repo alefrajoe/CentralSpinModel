@@ -49,6 +49,12 @@ class Model
     // observables
     double magObs[3];
     double maggroundObs[3];
+    double *magchainObs;
+    double *corrchainObs;
+    double avgmag;
+    double avgsusc;
+    arma::sp_cx_dmat *magchainop;
+    arma::sp_cx_dmat *corrchainop;
 
     // filename and hamiltonian
     std::string filename;
@@ -70,6 +76,10 @@ class Model
     void GroundStateAndEigenvals(arma::cx_vec *vec, bool replace_eigvals);
     // state normalization
     void StateNormalization();
+
+    // observables functions
+    void AddMagnetizationOperatorsChain(int direction);
+    void AddCorrelationOperatorsChain(int direction);
 
     // random numbers
     double RandomUniformDouble();

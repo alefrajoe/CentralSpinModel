@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 ###################################################################
 #                 Plot parameters
 x = 'time'
-y = 'magz'
+y = ''
 ###################################################################
 
 # define the directory where all data are stored
