@@ -21,7 +21,7 @@ On the one hand, the central spin qubit can be continuously monitored, projectin
 
 > #define MEASUREMENT_CENTRAL_SPIN_PROTOCOL (true)
 
-On the other hand, the Ising chain can be continuously monitored, given a probability $p$ per site of observation. In this case, instead, each one among the $L$ spins has a probability $p$ of being projecting along the up or down component of the direction observed.
+On the other hand, the Ising chain can be continuously monitored, given a probability $p$ per site of observation. In this case, instead, each one among the $L$ spins has a probability $p$ of being projecting along the up or down component of the direction observed. See [RV-2020](https://journals.aps.org/prb/abstract/10.1103/PhysRevB.102.035119).
 
 > #define MEASUREMENT_CHAIN_PROTOCOL (true)
 
@@ -38,6 +38,19 @@ To measure the spin(s) along a random axis.
 
 > #define MEASURE_RANDOM
 
+The parameters to be passed to the program are
+- **L** (**L**): int - length of the Ising chain
+- **g** (**g**): double - transverse coupling of the chain
+- **h** (**h**): double - longitudinal coupling of the chain
+- **$\lambda$** (**lambda**): double - gap of the single qubit
+- **$\kappa$** (**kappa**): double - interaction strength between the qubit and the chain
+- **a** (**a**): int - interaction term for the qubit $\sim \hat{\Sigma}^{(a)}$, it can be $a=1,2,3$.
+- **b** (**b**): int - interaction term for the chain $\sim \hat{\sigma}^{(b)}$, it can be $b=1,2,3$.
+- **t_M** (**tm**): double - time frame after which a measurement is tried.
+- **p** (**p**): double - probability of projecting the spin(s), after a time frame $t_M$, along the direction chosen in *macro.hpp*.
+- **seed** (**seed**): int - seed used for the random number generator. 
+- **steptm** (**steptm**): int - the integer is used to determing **$\delta t$** used in the simulation. If passed to the program, $\delta t=t_M / steptm$. 
+- **t_{MAX}** (**tmax**): double - time evolution duration.
 
 ## Kibble-Zurek protocol
 
