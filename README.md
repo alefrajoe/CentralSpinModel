@@ -68,7 +68,7 @@ where $\rho$ is the density matrix of the central spin. The decoherence is not c
 However, note that
 $$D(t)=\frac{1}{2}(1-\langle\vec{\Sigma}\rangle^2)$$
 
-- **Longitudinal Ising chain magnetization** $\frac{1}{L}\sum_{x=1}^L \langle \sigma^{(i)}_{x}(t)\rangle$:
+- **Longitudinal Ising chain magnetization** $\frac{1}{L}\displaystyle\sum_{x=1}^L \langle \sigma^{(i)}_{x}(t)\rangle$:
 > \# magChain
 
 $$\frac{1}{L}\sum_{x=1}^L\langle \sigma^{(i)}_{x} \rangle, \ \text{for} \ i=1$$
