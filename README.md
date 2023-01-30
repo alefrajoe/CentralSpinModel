@@ -12,8 +12,18 @@ To compile the code
 
 ## Measurement induced dynamic
 
-The dynamic of the whole system is driven by the interplay between the continuous monitoring of the central qubit and $\hat{H}$.
-We measure the central spin every $t_M$ with probability $p$ along the direction $\vec{n}$. 
+To use a measurement protocol, the proper macro should be defined in *macro.hpp*.
+
+> #define MEASUREMENT_PROTOCOL
+
+Two distinguished measurement-induced-dynamic protocols can be devised with this code.
+On the one hand, the central spin qubit can be continuously monitored, projecting its state along the up or down component along direction $\vec{n}$ (the direction of the observation). In this case, the spin is observed after a time frame $t_M$ with a probability $p$. To use this protocol set
+
+> MEASUREMENT_CENTRAL_SPIN_PROTOCOL (true)
+
+On the other hand, the Ising chain can be continuously monitored, given a probability $p$ per site of observation. In this case, instead, each one among the $L$ spins has a probability $p$ of being projecting along the up or down component of the direction observed.
+
+> MEASUREMENT_CHAIN_PROTOCOL (true)
 
 
 ## Kibble-Zurek protocol
