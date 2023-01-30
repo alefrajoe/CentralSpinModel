@@ -68,12 +68,12 @@ where $\rho$ is the density matrix of the central spin. The decoherence is not c
 However, note that
 $$D(t)=\frac{1}{2}(1-\langle\vec{\Sigma}\rangle^2)$$
 
-- **Longitudinal Ising chain magnetization** $\frac{1}{L}\displaystyle\sum_{x=1}^L \langle \sigma^{(i)}_{x}(t)\rangle$:
+- **Longitudinal Ising chain magnetization** $\frac{1}{L}\displaystyle\sum_{x=1}^L \langle \sigma^{(i)}_{x}\rangle$:
 > \# magChain
 
 $$\frac{1}{L}\sum_{x=1}^L\langle \sigma^{(i)}_{x} \rangle, \ \text{for} \ i=1$$
 
-- **Longitudinal Ising chain (connected) susceptibility** $\frac{1}{L}\sum_{x,y=1}^L\langle \sigma^{(i)}_{x}\sigma^{(i)}_{y}\rangle _c$:
-> \# magChain
+- **Longitudinal Ising chain (connected) susceptibility** :
+> \# suscChain
 
-$$\frac{1}{L}\sum_{x=1}^L\langle \sigma^{(i)}_{x} \rangle, \ \text{for} \ i=1$$
+$$\frac{1}{L}\sum_{x, y=1}^L\langle \sigma^{(i)}_{x}\sigma^{(i)}_{y} \rangle - \langle \sigma^{(i)}_{x}\rangle\langle \sigma^{(i)}_{y} \rangle, \ \text{for} \ i=1$$
