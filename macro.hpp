@@ -30,7 +30,7 @@
 #define EXPONENT_LAMBDA (1.0)
 #define EXPONENT_KAPPA (15.0/8.0)
 #define EXPONENT_H (15.0/8.0)
-#define EXPONENT_P (2.0)
+#define EXPONENT_P (0.0)
 
 /**
  * If ROUND_TRIP is defined, stop the KZ protocol when the parameters are all the same as the starting ones.
@@ -47,9 +47,9 @@
 // just one of these variables should be set to (true)
 //****************************************************************************
 // active if defind and set to (true)
-//#define MEASUREMENT_CENTRAL_SPIN_PROTOCOL (true)
+#define MEASUREMENT_CENTRAL_SPIN_PROTOCOL (true)
 // active if defined and set to true (true)
-#define MEASUREMENT_CHAIN_PROTOCOL (true)
+//#define MEASUREMENT_CHAIN_PROTOCOL (true)
 
 /**
  * Kibble-Zurek parameter:

@@ -26,6 +26,7 @@ int main(int argc, char **argv)
     model.ProjectStateWithMeasurementOnCentralSpin();
     #endif
     #ifdef MEASUREMENT_CHAIN_PROTOCOL
+    if(model.RandomUniformDouble() <= model.p)
     model.ProjectStateWithMeasurementsOnChain();
     #endif
 
