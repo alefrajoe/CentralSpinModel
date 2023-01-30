@@ -27,10 +27,15 @@ On the other hand, the Ising chain can be continuously monitored, given a probab
 
 Three possible spin projection are feasible within these two protocols.
 To measure the spin(s) along the $x$ axis.
+
 > #define MEASURE_SIGMAX
+
 To measure the spin(s) along the $z$ axis.
+
 > #define MEASURE_SIGMAZ
+
 To measure the spin(s) along a random axis.
+
 > #define MEASURE_RANDOM
 
 
