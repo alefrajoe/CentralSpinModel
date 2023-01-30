@@ -1,8 +1,0 @@
-\\ if we want to copy the matrix to a real one   
-    for(auto it=this->hamiltonian->begin(); it != this->hamiltonian->end(); ++it)
-    {
-        std::cout << "val: " << (*it)    << std::endl;
-        std::cout << "row: " << it.row() << std::endl;
-        std::cout << "col: " << it.col() << std::endl;
-    }
-
