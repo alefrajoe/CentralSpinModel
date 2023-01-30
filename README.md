@@ -19,11 +19,19 @@ To use a measurement protocol, the proper macro should be defined in *macro.hpp*
 Two distinguished measurement-induced-dynamic protocols can be devised with this code.
 On the one hand, the central spin qubit can be continuously monitored, projecting its state along the up or down component along direction $\vec{n}$ (the direction of the observation). In this case, the spin is observed after a time frame $t_M$ with a probability $p$. To use this protocol set
 
-> MEASUREMENT_CENTRAL_SPIN_PROTOCOL (true)
+> #define MEASUREMENT_CENTRAL_SPIN_PROTOCOL (true)
 
 On the other hand, the Ising chain can be continuously monitored, given a probability $p$ per site of observation. In this case, instead, each one among the $L$ spins has a probability $p$ of being projecting along the up or down component of the direction observed.
 
-> MEASUREMENT_CHAIN_PROTOCOL (true)
+> #define MEASUREMENT_CHAIN_PROTOCOL (true)
+
+Three possible spin projection are feasible within these two protocols.
+To measure the spin(s) along the $x$ axis.
+> #define MEASURE_SIGMAX
+To measure the spin(s) along the $z$ axis.
+> #define MEASURE_SIGMAZ
+To measure the spin(s) along a random axis.
+> #define MEASURE_RANDOM
 
 
 ## Kibble-Zurek protocol
