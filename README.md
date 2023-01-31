@@ -58,7 +58,7 @@ The parameters to be passed to the program are
 - **p** (**p**): double - probability of projecting the spin(s), after a time frame $t_M$, along the direction chosen in *macro.hpp*.
 - **seed** (**seed**): int - seed used for the random number generator. 
 - **steptm** (**steptm**): int - the integer is used to determing **$\delta t$** used in the simulation. If passed to the program, $\delta t=t_M / steptm$. 
-- **t_{MAX}** (**tmax**): double - time evolution duration.
+- **$t_{MAX}$** (**tmax**): double - diration of the time evolution.
 
 ## Kibble-Zurek protocol
 
