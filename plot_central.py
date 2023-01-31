@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 ###################################################################
 #                 Plot parameters
 x = 'time'
-y = ''
+y = 'deco'
 ###################################################################
 
 # define the directory where all data are stored
@@ -42,7 +42,7 @@ for file in FILES:
                 #angle = (magx*maggsx+magy*maggsy+magz*maggsz)/(np.sqrt(magx*magx+magy*magy+magz*magz)*np.sqrt(maggsx*maggsx+maggsy*maggsy+maggsz*maggsz))
             #deco = 0.5 * (1.0 - (magx*magx+magy*magy+magz*magz))
             # plot the data
-            plt.errorbar(data[obs.index(x)]/L, data[obs.index(y)], linestyle="-", label="L="+str(int(L[0])))
+            plt.errorbar(data[obs.index(x)]/L, data[obs.index(y)], marker=".",  linestyle="none", label="L="+str(int(L[0])))
             plt.xlabel(x)
             plt.ylabel(y)
 

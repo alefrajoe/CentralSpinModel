@@ -62,10 +62,12 @@ for file in FILES:
             df_mean["err_magy"] = df_stddev_mean["magy"]
             df_mean["err_magz"] = df_stddev_mean["magz"]
             df_mean["err_deco"] = df_stddev_mean["deco"]
+            df_mean["err_magChain"] = df_stddev_mean["magChain"]
+            df_mean["err_suscChain"] = df_stddev_mean["suscChain"]
         
             # create the plot file if it does not exist
             path_plot = Path(os.path.join(path, file))
-            if(not path_plot.exists()):
+            if(df_mean["measure"][0] > 0):
                 # save the analyzed file into the director
                 with open(os.path.join(path, file), 'w') as gfile:
                     # first line

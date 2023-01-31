@@ -216,6 +216,30 @@ Model::Model(int argc, char **argv)
     outfile << "    magChain  suscChain";
     #endif
     outfile << std::endl;
+    // second line in file
+    outfile << "#";
+    #ifdef PBC
+    outfile << "PBC ";
+    #endif
+    #ifdef MEASUREMENT_PROTOCOL
+    outfile << "MEASUREMENT_PROTOCOL=";
+    #endif
+    #ifdef MEASUREMENT_CENTRAL_SPIN_PROTOCOL
+    outfile << "CENTRAL_SPIN    ";
+    #endif
+    #ifdef MEASUREMENT_CHAIN_PROTOCOL
+    outfile << "CHAIN   "
+    #endif
+    #ifdef MEASURE_SIGMAX
+    outfile << "OBSERVED=SIGMAX";
+    #endif
+    #ifdef MEASURE_SIGMAY
+    outfile << "OBSERVED=SIGMAY";
+    #endif
+    #ifdef MEASURE_SIGMAZ
+    outfile << "OBSERVED=SIGMAZ";
+    #endif
+    outfile << std::endl;
     // close file
     outfile.close(); 
 }

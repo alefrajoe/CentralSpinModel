@@ -10,6 +10,14 @@ To compile the code
 
 > g++ -O3 *.cpp -o central -lm -larmadillo -lstdc++fs
 
+In *macro.hpp*, if the variable SCALING_VARIABLES is set to **true**, all those parameters that in *macro.hpp* have the associated
+variable #define EXPONENT_.. (double) defined are rescaled with the same exponent contained within the parentheses. Example
+
+> #define SCALING_VARIABLES (true)
+> #define EXPONENT_H (15.0/8.0)
+
+The value of h passed is rescaled by a factor $h \to h^\prime=h/L^{15/8}$.
+
 ## Measurement induced dynamic
 
 To use a measurement protocol, the proper macro should be defined in *macro.hpp*.

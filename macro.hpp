@@ -30,7 +30,7 @@
 #define EXPONENT_LAMBDA (1.0)
 #define EXPONENT_KAPPA (15.0/8.0)
 #define EXPONENT_H (15.0/8.0)
-#define EXPONENT_P (0.0)
+#define EXPONENT_P (1.0)
 
 /**
  * If ROUND_TRIP is defined, stop the KZ protocol when the parameters are all the same as the starting ones.
