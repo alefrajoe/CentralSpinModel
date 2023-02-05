@@ -4,7 +4,11 @@ CC=g++
 FLAGS=-O3
 # further libraries required
 LIB=-lm -larmadillo -lstdc++fs
+# directory where the include files are located
+DIR_INC=include
+# directory where the source is located
+DIR_SRC=src
 
 # Makefile
-central: *.cpp *.hpp
-	$(CC) $(FLAGS) *.cpp *.hpp -o central $(LIB)
+central: $(DIR_SRC)/*.cpp $(DIR_INC)/*.hpp
+	$(CC) $(FLAGS) $(DIR_SRC)/*.cpp -o central $(LIB)
