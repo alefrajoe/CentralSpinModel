@@ -6,9 +6,13 @@ $$\hat{H}=-J\sum_{i=1}^L\hat{\sigma}^{(1)}_i\hat{\sigma}^{(1)}_{i+1}-g\sum_{i=1}
 
 where Periodic Boundary Conditions (PBC) are intended in the above expression, and $a, b=1,2,3$ are two directions chosen at running time. We set $J=1$, so that all quantities are measured in units of $J$.
 
-To compile the code
+To compile the code, just prompt make command
 
-> g++ -O3 *.cpp -o central -lm -larmadillo -lstdc++fs
+> make
+
+The Makefile is self-explanatory, it just runs the command
+
+> g++ -O3 src/*.cpp -o central -lm -larmadillo -lstdc++fs
 
 In *macro.hpp*, if the variable SCALING_VARIABLES is set to **true**, all those parameters that in *macro.hpp* have the associated
 variable #define EXPONENT_.. (double) defined are rescaled with the same exponent contained within the parentheses. Example
